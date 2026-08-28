@@ -12,23 +12,8 @@
         </button>
       </div>
 
-      <!-- Quick interactive toggle & search filters -->
+      <!-- Search filters -->
       <div class="right-tools">
-        <div class="view-mode-toggle" title="快速切换演示状态">
-          <button 
-            :class="['mode-btn', { active: rulesList.length === 0 }]"
-            @click="clearData"
-          >
-            照片空状态 (暂无数据)
-          </button>
-          <button 
-            :class="['mode-btn', { active: rulesList.length > 0 }]"
-            @click="loadSampleData"
-          >
-            规则列表状态
-          </button>
-        </div>
-
         <div class="search-filter-wrap">
           <select v-model="searchType" class="search-select">
             <option value="target">目标桶名称</option>
@@ -153,19 +138,6 @@ import { ref, computed } from 'vue'
 import CreateRuleModal from './CreateRuleModal.vue'
 import DeleteConfirmModal from './DeleteConfirmModal.vue'
 
-const currentBucketName = 'jgh-kf-bucket-testpulsar2'
-
-// Initial state is empty, matching photo/跨域复制管理列表页.jpeg
-const rulesList = ref([])
-
-const searchType = ref('target')
-const searchKeyword = ref('')
-const activeFilter = ref('')
-
-const showCreateModal = ref(false)
-const showDeleteModal = ref(false)
-const deletingRule = ref(null)
-
 const sampleRules = [
   {
     sourceBucket: 'jgh-kf-bucket-testpulsar2',
@@ -190,15 +162,16 @@ const sampleRules = [
   }
 ]
 
-const loadSampleData = () => {
-  rulesList.value = [...sampleRules]
-}
+// Rules list
+const rulesList = ref([...sampleRules])
 
-const clearData = () => {
-  rulesList.value = []
-  searchKeyword.value = ''
-  activeFilter.value = ''
-}
+const searchType = ref('target')
+const searchKeyword = ref('')
+const activeFilter = ref('')
+
+const showCreateModal = ref(false)
+const showDeleteModal = ref(false)
+const deletingRule = ref(null)
 
 const filteredRules = computed(() => {
   if (!activeFilter.value) return rulesList.value
@@ -294,32 +267,6 @@ const handleConfirmDelete = (rule) => {
   display: flex;
   align-items: center;
   gap: 16px;
-}
-
-.view-mode-toggle {
-  display: flex;
-  align-items: center;
-  background-color: #eef2f8;
-  border-radius: 4px;
-  padding: 2px;
-}
-
-.mode-btn {
-  background: transparent;
-  border: none;
-  font-size: 12px;
-  padding: 4px 10px;
-  color: #555555;
-  border-radius: 3px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.mode-btn.active {
-  background: #ffffff;
-  color: #2468f2;
-  font-weight: 600;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .search-filter-wrap {

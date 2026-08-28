@@ -573,29 +573,6 @@
       align-items: center;
       gap: 16px;
     }
-    .view-mode-toggle {
-      display: flex;
-      align-items: center;
-      background-color: #eef2f8;
-      border-radius: 4px;
-      padding: 2px;
-    }
-    .mode-btn {
-      background: transparent;
-      border: none;
-      font-size: 12px;
-      padding: 4px 10px;
-      color: #555555;
-      border-radius: 3px;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .mode-btn.active {
-      background: #ffffff;
-      color: #2468f2;
-      font-weight: 600;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
     .search-filter-wrap {
       display: flex;
       align-items: center;
@@ -1169,21 +1146,6 @@
                 </div>
 
                 <div class="right-tools">
-                  <div class="view-mode-toggle">
-                    <button 
-                      :class="['mode-btn', { active: rulesList.length === 0 }]"
-                      @click="rulesList = []"
-                    >
-                      照片空状态 (暂无数据)
-                    </button>
-                    <button 
-                      :class="['mode-btn', { active: rulesList.length > 0 }]"
-                      @click="loadSampleData"
-                    >
-                      规则列表状态
-                    </button>
-                  </div>
-
                   <div class="search-filter-wrap">
                     <select v-model="searchType" class="search-select">
                       <option value="target">目标桶名称</option>
@@ -1485,9 +1447,6 @@
           { id: 'cors', name: 'CORS管理' }
         ]
 
-        // Rules state - Initial empty matching photo
-        const rulesList = ref([])
-
         const sampleRules = [
           {
             sourceBucket: 'jgh-kf-bucket-testpulsar2',
@@ -1512,9 +1471,8 @@
           }
         ]
 
-        const loadSampleData = () => {
-          rulesList.value = [...sampleRules]
-        }
+        // Rules state
+        const rulesList = ref([...sampleRules])
 
         const searchType = ref('target')
         const searchKeyword = ref('')
@@ -1582,7 +1540,6 @@
           currentSubTab,
           subTabs,
           rulesList,
-          loadSampleData,
           searchType,
           searchKeyword,
           activeFilter,
