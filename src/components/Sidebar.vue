@@ -2,14 +2,14 @@
   <aside :class="['sidebar', { collapsed: isCollapsed }]">
     <div class="menu-container">
       <div 
-        v-for="group in menuGroups" 
+        v-for="group in activeMenuGroups" 
         :key="group.id" 
         class="menu-group"
       >
         <!-- Group Header (Parent Item) -->
         <div 
           :class="['group-title', { 
-            active: group.id === 'storage',
+            active: isGroupActive(group),
             expanded: expandedGroups[group.id]
           }]"
           @click="toggleGroup(group.id)"
@@ -17,7 +17,15 @@
           <div class="title-left">
             <span class="menu-icon">
               <!-- Render specific icon based on group.icon -->
-              <svg v-if="group.icon === 'container'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg v-if="group.icon === 'mq'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                <line x1="8" y1="10" x2="16" y2="10"/>
+                <line x1="8" y1="6" x2="14" y2="6"/>
+              </svg>
+              <svg v-else-if="group.icon === 'cache'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+              </svg>
+              <svg v-else-if="group.icon === 'container'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
                 <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
               </svg>
@@ -45,27 +53,16 @@
                 <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
                 <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
               </svg>
-              <svg v-else-if="group.icon === 'database'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <ellipse cx="12" cy="5" rx="8" ry="3"/>
-                <path d="M4 5v6c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/>
-                <path d="M4 11v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/>
-              </svg>
-              <svg v-else-if="group.icon === 'middleware'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="3" width="7" height="7"/>
-                <rect x="14" y="3" width="7" height="7"/>
-                <rect x="14" y="14" width="7" height="7"/>
-                <rect x="3" y="14" width="7" height="7"/>
-              </svg>
               <svg v-else-if="group.icon === 'analytics'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="18" y1="20" x2="18" y2="10"/>
                 <line x1="12" y1="20" x2="12" y2="4"/>
                 <line x1="6" y1="20" x2="6" y2="14"/>
               </svg>
-              <svg v-else-if="group.icon === 'bigdata'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-              </svg>
-              <svg v-else-if="group.icon === 'security'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <svg v-else-if="group.icon === 'trash'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                <line x1="10" y1="11" x2="10" y2="17"/>
+                <line x1="14" y1="11" x2="14" y2="17"/>
               </svg>
               <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="10"/>
@@ -113,28 +110,68 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
+
+const props = defineProps({
+  currentProduct: {
+    type: String,
+    default: 'xuanwu'
+  },
+  modelValue: {
+    type: String,
+    default: 'obs-bucket'
+  }
+})
+
+const emit = defineEmits(['update:modelValue', 'select-menu'])
 
 const isCollapsed = ref(false)
-const activeSubItem = ref('obs-bucket')
+const activeSubItem = ref(props.modelValue || 'obs-bucket')
+
+watch(() => props.modelValue, (newVal) => {
+  if (newVal) {
+    activeSubItem.value = newVal
+  }
+})
 
 const expandedGroups = reactive({
   storage: true,
+  mq: false,
+  cache: false,
+  analytics: false,
+  compute: false,
+  trash: false,
+  network: false,
   container1: false,
   container2: false,
-  network_test: false,
-  compute: false,
-  network: false,
   database: false,
   middleware: false,
-  analytics: false,
   bigdata: false,
   security: false
 })
 
-const menuGroups = [
+// Menu for Xuanwu Cloud (玄武云产品) matching photo/玄武云-对象存储桶 列表页.jpg
+const xuanwuMenuGroups = [
+  { id: 'mq', name: '消息队列服务', icon: 'mq' },
+  { id: 'cache', name: '缓存服务', icon: 'cache' },
+  { id: 'analytics', name: '数据计算与分析服务', icon: 'analytics' },
+  { id: 'compute', name: '计算服务', icon: 'compute' },
+  { 
+    id: 'storage', 
+    name: '存储服务', 
+    icon: 'storage',
+    children: [
+      { id: 'obs-bucket', name: '对象存储桶' },
+      { id: 'obs-user', name: '对象存储用户' }
+    ]
+  },
+  { id: 'trash', name: '回收站', icon: 'trash' },
+  { id: 'network', name: '网络服务', icon: 'network' }
+]
+
+// Menu for Tianji Cloud (天玑云产品)
+const tianjiMenuGroups = [
   { id: 'container1', name: '容器服务', icon: 'container' },
-  { id: 'container2', name: '容器服务', icon: 'container' },
   { id: 'network_test', name: '网络测试 (network)', icon: 'network' },
   { id: 'compute', name: '计算服务', icon: 'compute' },
   { 
@@ -145,8 +182,8 @@ const menuGroups = [
       { id: 'evs', name: '信创云硬盘(EVS)' },
       { id: 'sfs', name: '信创文件存储(SFS)' },
       { id: 'snapshot', name: '信创快照' },
-      { id: 'obs-bucket', name: '信创对象存储-桶(OBS)' },
-      { id: 'obs-user', name: '信创对象存储-用户' }
+      { id: 'tianji-obs-bucket', name: '信创对象存储-桶(OBS)' },
+      { id: 'tianji-obs-user', name: '信创对象存储-用户' }
     ]
   },
   { id: 'network', name: '网络服务', icon: 'network' },
@@ -157,12 +194,26 @@ const menuGroups = [
   { id: 'security', name: '安全服务', icon: 'security' }
 ]
 
+const activeMenuGroups = computed(() => {
+  return props.currentProduct === 'tianji' ? tianjiMenuGroups : xuanwuMenuGroups
+})
+
+const isGroupActive = (group) => {
+  if (group.id === 'storage') return true
+  if (group.children && group.children.some(c => c.id === activeSubItem.value)) {
+    return true
+  }
+  return false
+}
+
 const toggleGroup = (groupId) => {
   expandedGroups[groupId] = !expandedGroups[groupId]
 }
 
 const selectSubItem = (subId) => {
   activeSubItem.value = subId
+  emit('update:modelValue', subId)
+  emit('select-menu', subId)
 }
 </script>
 

@@ -21,7 +21,7 @@
           v-for="item in navList" 
           :key="item.id"
           :class="['nav-item', { active: currentNav === item.id }]"
-          @click="currentNav = item.id"
+          @click="selectNav(item.id)"
         >
           {{ item.name }}
         </a>
@@ -87,9 +87,22 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 
-const currentNav = ref('tianji')
+const props = defineProps({
+  modelValue: {
+    type: String,
+    default: 'xuanwu'
+  }
+})
+
+const emit = defineEmits(['update:modelValue', 'change'])
+
+const currentNav = ref(props.modelValue || 'xuanwu')
+
+watch(() => props.modelValue, (val) => {
+  if (val) currentNav.value = val
+})
 
 const navList = [
   { id: 'apaas', name: 'aPaaS' },
@@ -100,6 +113,12 @@ const navList = [
   { id: 'resource', name: '资源管理' },
   { id: 'system', name: '系统管理' }
 ]
+
+const selectNav = (id) => {
+  currentNav.value = id
+  emit('update:modelValue', id)
+  emit('change', id)
+}
 </script>
 
 <style scoped>

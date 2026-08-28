@@ -2,7 +2,7 @@
   <div class="bucket-detail-card">
     <!-- Card Header with Title and Back Button -->
     <div class="card-top-bar">
-      <h2 class="bucket-title">jgh-kf-bucket-testpulsar2</h2>
+      <h2 class="bucket-title">{{ bucketName }}</h2>
       <button class="btn-back" @click="handleBack">返回</button>
     </div>
 
@@ -39,12 +39,29 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import CrossRegionReplication from './CrossRegionReplication.vue'
 import AuthManagement from './AuthManagement.vue'
 import BasicInfo from './BasicInfo.vue'
 
-const currentSubTab = ref('ccr')
+const props = defineProps({
+  bucketName: {
+    type: String,
+    default: 'jgh-kf-bucket-testpulsar2'
+  },
+  defaultTab: {
+    type: String,
+    default: 'ccr'
+  }
+})
+
+const emit = defineEmits(['back'])
+
+const currentSubTab = ref(props.defaultTab || 'ccr')
+
+watch(() => props.defaultTab, (val) => {
+  if (val) currentSubTab.value = val
+})
 
 const subTabs = [
   { id: 'info', name: '基本信息' },
@@ -61,7 +78,7 @@ const getTabName = (tabId) => {
 }
 
 const handleBack = () => {
-  // Navigation feedback
+  emit('back')
 }
 </script>
 
