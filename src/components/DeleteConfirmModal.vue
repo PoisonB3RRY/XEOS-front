@@ -34,7 +34,7 @@
                 <td>{{ itemData?.sourceBucket || 'test-1' }}</td>
                 <td>{{ itemData?.targetBucket || 'testdcsp' }}</td>
                 <td>
-                  <span class="status-badge" :class="itemData?.status === '暂停' ? 'status-paused' : 'status-active'">
+                  <span class="status-badge" :class="itemData?.status === '禁用' ? 'status-disabled' : 'status-active'">
                     ● {{ itemData?.status || '启用' }}
                   </span>
                 </td>
@@ -210,7 +210,7 @@ const handleConfirm = () => {
   color: #52c41a;
 }
 
-.status-paused {
+.status-disabled {
   color: #faad14;
 }
 

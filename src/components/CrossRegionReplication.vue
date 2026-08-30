@@ -55,6 +55,7 @@
             <th class="col-scope">复制对象</th>
             <th class="col-status">状态</th>
             <th class="col-history">历史对象</th>
+            <th class="col-delete-op">删除操作</th>
             <th v-if="filteredRules.length > 0" class="col-op">操作</th>
           </tr>
         </thead>
@@ -66,17 +67,18 @@
             <td class="col-target">
               <span class="bucket-link">{{ rule.targetBucket }}</span>
             </td>
-            <td class="col-scope">{{ rule.scope }}</td>
+            <td class="col-scope">{{ rule.scope || '全部对象' }}</td>
             <td class="col-status">
               <span :class="['status-tag', rule.status === '启用' ? 'status-enabled' : 'status-disabled']">
                 ● {{ rule.status }}
               </span>
             </td>
             <td class="col-history">{{ rule.historySync }}</td>
+            <td class="col-delete-op">{{ rule.deleteSync || '同步' }}</td>
             <td class="col-op">
               <div class="op-links">
                 <a class="op-link" @click="toggleRuleStatus(rule)">
-                  {{ rule.status === '启用' ? '暂停' : '启用' }}
+                  {{ rule.status === '启用' ? '禁用' : '启用' }}
                 </a>
                 <a class="op-link delete" @click="openDeleteModal(rule)">删除</a>
               </div>
@@ -119,7 +121,7 @@
     <!-- Create Rule Modal -->
     <CreateRuleModal 
       v-model:visible="showCreateModal"
-      :source-bucket="currentBucketName"
+      :source-bucket="sourceBucket"
       @submit="handleCreateRule"
     />
 
@@ -134,36 +136,52 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import CreateRuleModal from './CreateRuleModal.vue'
 import DeleteConfirmModal from './DeleteConfirmModal.vue'
 
+const props = defineProps({
+  sourceBucket: {
+    type: String,
+    default: 'jgh-kf-bucket-testpulsar2'
+  }
+})
+
 const sampleRules = [
   {
-    sourceBucket: 'jgh-kf-bucket-testpulsar2',
+    sourceBucket: props.sourceBucket || 'jgh-kf-bucket-testpulsar2',
     targetBucket: 'testdcsp',
     scope: '全部对象',
     status: '启用',
-    historySync: '同步'
+    historySync: '同步',
+    deleteSync: '同步'
   },
   {
-    sourceBucket: 'jgh-kf-bucket-testpulsar2',
+    sourceBucket: props.sourceBucket || 'jgh-kf-bucket-testpulsar2',
     targetBucket: 'test-1',
-    scope: '前缀: logs/',
+    scope: '全部对象',
     status: '启用',
-    historySync: '不同步'
+    historySync: '不同步',
+    deleteSync: '不同步'
   },
   {
-    sourceBucket: 'jgh-kf-bucket-testpulsar2',
+    sourceBucket: props.sourceBucket || 'jgh-kf-bucket-testpulsar2',
     targetBucket: 'xum3-test-20260603',
-    scope: '前缀: backup/',
-    status: '暂停',
-    historySync: '同步'
+    scope: '全部对象',
+    status: '禁用',
+    historySync: '同步',
+    deleteSync: '同步'
   }
 ]
 
 // Rules list
 const rulesList = ref([...sampleRules])
+
+watch(() => props.sourceBucket, (newVal) => {
+  if (newVal) {
+    rulesList.value = sampleRules.map(r => ({ ...r, sourceBucket: newVal }))
+  }
+})
 
 const searchType = ref('target')
 const searchKeyword = ref('')
@@ -203,7 +221,7 @@ const handleCreateRule = (newRule) => {
 }
 
 const toggleRuleStatus = (rule) => {
-  rule.status = rule.status === '启用' ? '暂停' : '启用'
+  rule.status = rule.status === '启用' ? '禁用' : '启用'
 }
 
 const openDeleteModal = (rule) => {
@@ -395,12 +413,13 @@ const handleConfirmDelete = (rule) => {
   border-bottom: 1px solid #f0f2f5;
 }
 
-.col-source { width: 25%; }
-.col-target { width: 25%; }
-.col-scope { width: 18%; }
-.col-status { width: 14%; }
+.col-source { width: 22%; }
+.col-target { width: 22%; }
+.col-scope { width: 14%; }
+.col-status { width: 12%; }
 .col-history { width: 10%; }
-.col-op { width: 12%; text-align: right; }
+.col-delete-op { width: 10%; }
+.col-op { width: 10%; text-align: right; }
 
 .bucket-link {
   color: #2468f2;

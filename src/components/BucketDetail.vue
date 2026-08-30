@@ -21,7 +21,7 @@
     <!-- Tab Content -->
     <div class="tab-panel-content">
       <!-- 跨域复制管理 (CCR) - 目标复刻页 -->
-      <CrossRegionReplication v-if="currentSubTab === 'ccr'" />
+      <CrossRegionReplication v-if="currentSubTab === 'ccr'" :source-bucket="bucketName" />
 
       <!-- 授权管理 -->
       <AuthManagement v-else-if="currentSubTab === 'auth'" />

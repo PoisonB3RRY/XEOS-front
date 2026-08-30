@@ -679,12 +679,13 @@
       color: #333333;
       border-bottom: 1px solid #f0f2f5;
     }
-    .col-source { width: 25%; }
-    .col-target { width: 25%; }
-    .col-scope { width: 18%; }
-    .col-status { width: 14%; }
+    .col-source { width: 22%; }
+    .col-target { width: 22%; }
+    .col-scope { width: 14%; }
+    .col-status { width: 12%; }
     .col-history { width: 10%; }
-    .col-op { width: 12%; text-align: right; }
+    .col-delete-op { width: 10%; }
+    .col-op { width: 10%; text-align: right; }
     .bucket-link {
       color: #2468f2;
       cursor: pointer;
@@ -762,10 +763,11 @@
       animation: fadeIn 0.2s ease;
     }
     .modal-card {
-      width: 580px;
+      width: 620px;
+      max-height: 90vh;
       background: #ffffff;
       border-radius: 4px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -780,11 +782,27 @@
       align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid #f0f0f0;
+      flex-shrink: 0;
+    }
+    .title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
     .modal-title {
       font-size: 15px;
       font-weight: 600;
       color: #333333;
+    }
+    .info-circle {
+      display: flex;
+      align-items: center;
+      color: #8c8c8c;
+      cursor: pointer;
+    }
+    .info-circle svg {
+      width: 14px;
+      height: 14px;
     }
     .modal-close-btn {
       background: none;
@@ -799,34 +817,62 @@
       color: #333333;
     }
     .modal-body {
-      padding: 24px 32px 16px;
+      padding: 20px 28px 16px;
+      overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      gap: 16px;
+    }
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333333;
+      margin-top: 4px;
+      margin-bottom: -4px;
     }
     .form-item {
       display: flex;
       align-items: flex-start;
     }
     .form-label {
-      width: 100px;
+      width: 135px;
       font-size: 13px;
       color: #555555;
-      padding-top: 6px;
+      padding-top: 5px;
       flex-shrink: 0;
       text-align: right;
-      margin-right: 16px;
+      margin-right: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 4px;
     }
     .required {
       color: #ff4d4f;
-      margin-right: 4px;
+      margin-right: 2px;
+    }
+    .label-info-icon {
+      display: inline-flex;
+      align-items: center;
+      color: #8c8c8c;
+      cursor: pointer;
+    }
+    .label-info-icon svg {
+      width: 13px;
+      height: 13px;
     }
     .form-content {
       flex: 1;
     }
+    .text-value {
+      display: inline-block;
+      padding-top: 5px;
+      font-size: 13px;
+      color: #333333;
+    }
     .form-input, .form-select {
       width: 100%;
-      height: 34px;
+      height: 32px;
       border: 1px solid #d9d9d9;
       border-radius: 4px;
       padding: 0 10px;
@@ -849,7 +895,7 @@
       display: flex;
       align-items: center;
       gap: 24px;
-      height: 34px;
+      min-height: 32px;
     }
     .radio-label {
       display: flex;
@@ -862,6 +908,96 @@
     .radio-label input[type="radio"] {
       accent-color: #2468f2;
       cursor: pointer;
+    }
+    .btn-tag {
+      height: 28px;
+      padding: 0 16px;
+      background-color: #2468f2;
+      color: #ffffff;
+      border: 1px solid #2468f2;
+      border-radius: 3px;
+      font-size: 13px;
+      cursor: default;
+    }
+    .advanced-section {
+      margin-top: 4px;
+    }
+    .advanced-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+      padding: 6px 0;
+      color: #333333;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .advanced-header .arrow-icon {
+      display: flex;
+      align-items: center;
+      color: #666666;
+    }
+    .advanced-header .arrow-icon svg {
+      width: 14px;
+      height: 14px;
+    }
+    .advanced-body {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .sub-tip-text {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #8c8c8c;
+      line-height: 1.5;
+      display: flex;
+      align-items: flex-start;
+      gap: 4px;
+    }
+    .tip-icon {
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .tip-icon svg {
+      width: 12px;
+      height: 12px;
+    }
+    .segmented-control {
+      display: inline-flex;
+      border-radius: 3px;
+      overflow: hidden;
+      border: 1px solid #d9d9d9;
+    }
+    .seg-btn {
+      height: 28px;
+      padding: 0 16px;
+      background: #ffffff;
+      border: none;
+      font-size: 13px;
+      color: #555555;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .seg-btn:not(:last-child) {
+      border-right: 1px solid #d9d9d9;
+    }
+    .seg-btn.active {
+      background-color: #2468f2;
+      color: #ffffff;
+      font-weight: 500;
+    }
+    .modal-footer {
+      padding: 12px 24px 18px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      border-top: 1px solid #f0f0f0;
+      flex-shrink: 0;
     }
     .prefix-input-wrap {
       margin-top: 8px;
@@ -1185,6 +1321,7 @@
                       <th class="col-scope">复制对象</th>
                       <th class="col-status">状态</th>
                       <th class="col-history">历史对象</th>
+                      <th class="col-delete-op">删除操作</th>
                       <th v-if="filteredRules.length > 0" class="col-op">操作</th>
                     </tr>
                   </thead>
@@ -1192,17 +1329,18 @@
                     <tr v-for="(rule, idx) in filteredRules" :key="idx">
                       <td class="col-source"><span class="bucket-link">{{ rule.sourceBucket }}</span></td>
                       <td class="col-target"><span class="bucket-link">{{ rule.targetBucket }}</span></td>
-                      <td class="col-scope">{{ rule.scope }}</td>
+                      <td class="col-scope">{{ rule.scope || '全部对象' }}</td>
                       <td class="col-status">
                         <span :class="['status-tag', rule.status === '启用' ? 'status-enabled' : 'status-disabled']">
                           ● {{ rule.status }}
                         </span>
                       </td>
                       <td class="col-history">{{ rule.historySync }}</td>
+                      <td class="col-delete-op">{{ rule.deleteSync || '同步' }}</td>
                       <td class="col-op">
                         <div class="op-links">
-                          <a class="op-link" @click="rule.status = rule.status === '启用' ? '暂停' : '启用'">
-                            {{ rule.status === '启用' ? '暂停' : '启用' }}
+                          <a class="op-link" @click="rule.status = rule.status === '启用' ? '禁用' : '启用'">
+                            {{ rule.status === '启用' ? '禁用' : '启用' }}
                           </a>
                           <a class="op-link delete" @click="openDeleteModal(rule)">删除</a>
                         </div>
@@ -1282,54 +1420,214 @@
     <div v-if="showCreateModal" class="modal-overlay" @click.self="showCreateModal = false">
       <div class="modal-card">
         <div class="modal-header">
-          <h3 class="modal-title">创建跨域复制</h3>
+          <div class="title-wrap">
+            <h3 class="modal-title">创建跨域复制</h3>
+            <span class="info-circle" title="跨域复制规则说明">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+            </span>
+          </div>
           <button class="modal-close-btn" @click="showCreateModal = false">×</button>
         </div>
+
         <div class="modal-body">
+          <!-- 1. 状态 -->
           <div class="form-item">
-            <label class="form-label"><span class="required">*</span> 源桶名称</label>
-            <div class="form-content"><input type="text" value="jgh-kf-bucket-testpulsar2" disabled class="form-input disabled" /></div>
-          </div>
-          <div class="form-item">
-            <label class="form-label"><span class="required">*</span> 目标桶名称</label>
+            <label class="form-label"><span class="required">*</span> 状态</label>
             <div class="form-content">
-              <select v-model="newRule.targetBucket" class="form-select">
-                <option value="" disabled>请选择目标桶</option>
-                <option v-for="b in ['testdcsp', 'test-1', 'xum3-test-20260603', 'yangxw-test-qu', 'yangxw-test']" :key="b" :value="b">{{ b }}</option>
-              </select>
+              <div class="radio-group">
+                <label class="radio-label">
+                  <input type="radio" value="启用" v-model="newRule.status" />
+                  <span>启用</span>
+                </label>
+                <label class="radio-label">
+                  <input type="radio" value="禁用" v-model="newRule.status" />
+                  <span>禁用</span>
+                </label>
+              </div>
             </div>
           </div>
+
+          <!-- 2. 源桶参数组 -->
+          <div class="section-title">源桶</div>
+
+          <div class="form-item">
+            <label class="form-label"><span class="required">*</span> 桶名称</label>
+            <div class="form-content">
+              <span class="text-value">{{ sourceBucketInfo.name }}</span>
+            </div>
+          </div>
+
+          <div class="form-item">
+            <label class="form-label"><span class="required">*</span> 区域</label>
+            <div class="form-content">
+              <span class="text-value">{{ sourceBucketInfo.region }}</span>
+            </div>
+          </div>
+
+          <div class="form-item">
+            <label class="form-label"><span class="required">*</span> 集群</label>
+            <div class="form-content">
+              <span class="text-value">{{ sourceBucketInfo.cluster }}</span>
+            </div>
+          </div>
+
           <div class="form-item">
             <label class="form-label"><span class="required">*</span> 复制对象</label>
             <div class="form-content">
-              <div class="radio-group">
-                <label class="radio-label"><input type="radio" value="全部对象" v-model="newRule.scopeType" /> <span>全部对象</span></label>
-                <label class="radio-label"><input type="radio" value="指定前缀" v-model="newRule.scopeType" /> <span>指定前缀</span></label>
-              </div>
-              <div v-if="newRule.scopeType === '指定前缀'" class="prefix-input-wrap">
-                <input type="text" v-model="newRule.prefix" placeholder="请输入前缀，例如：logs/ 或 backup/" class="form-input" />
-              </div>
+              <button type="button" class="btn-tag active">所有对象</button>
             </div>
           </div>
+
+          <!-- 3. 目标桶参数组 -->
+          <div class="section-title">目标桶</div>
+
           <div class="form-item">
-            <label class="form-label"><span class="required">*</span> 历史对象</label>
+            <label class="form-label"><span class="required">*</span> 区域</label>
             <div class="form-content">
-              <div class="radio-group">
-                <label class="radio-label"><input type="radio" value="同步" v-model="newRule.historySync" /> <span>同步历史对象</span></label>
-                <label class="radio-label"><input type="radio" value="不同步" v-model="newRule.historySync" /> <span>仅同步新对象 (不同步)</span></label>
-              </div>
+              <span class="text-value">{{ targetRegion }}</span>
             </div>
           </div>
+
           <div class="form-item">
-            <label class="form-label"><span class="required">*</span> 策略状态</label>
+            <label class="form-label"><span class="required">*</span> 集群</label>
             <div class="form-content">
-              <div class="radio-group">
-                <label class="radio-label"><input type="radio" value="启用" v-model="newRule.status" /> <span>启用</span></label>
-                <label class="radio-label"><input type="radio" value="暂停" v-model="newRule.status" /> <span>暂停</span></label>
+              <select v-model="newRule.targetCluster" class="form-select">
+                <option value="" disabled>请选择集群</option>
+                <option v-for="cluster in clusterOptions" :key="cluster" :value="cluster">{{ cluster }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-item">
+            <label class="form-label">
+              <span class="required">*</span> 桶
+              <span class="label-info-icon" title="选择目标桶">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="16" x2="12" y2="12"/>
+                  <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+              </span>
+            </label>
+            <div class="form-content">
+              <select v-model="newRule.targetBucket" class="form-select">
+                <option value="" disabled>请选择目标桶</option>
+                <option v-for="b in filteredTargetBuckets" :key="b" :value="b">{{ b }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 4. 高级选项参数组 -->
+          <div class="advanced-section">
+            <div class="advanced-header" @click="isAdvancedOpen = !isAdvancedOpen">
+              <span class="arrow-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline v-if="isAdvancedOpen" points="6 9 12 15 18 9"/>
+                  <polyline v-else points="9 18 15 12 9 6"/>
+                </svg>
+              </span>
+              <span class="advanced-title">高级选项</span>
+            </div>
+
+            <div v-show="isAdvancedOpen" class="advanced-body">
+              <!-- 是否开启双向复制 -->
+              <div class="form-item">
+                <label class="form-label"><span class="required">*</span> 是否开启双向复制</label>
+                <div class="form-content">
+                  <div class="radio-group">
+                    <label class="radio-label">
+                      <input type="radio" value="是" v-model="newRule.bidirectional" />
+                      <span>是</span>
+                    </label>
+                    <label class="radio-label">
+                      <input type="radio" value="否" v-model="newRule.bidirectional" />
+                      <span>否</span>
+                    </label>
+                  </div>
+                  <div class="sub-tip-text">
+                    <span class="tip-icon">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="16" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                      </svg>
+                    </span>
+                    <span>开启双向复制后会同步在目标桶创建一条和此条规则完全一样的规则（目标桶复制到源桶，即源桶目标桶互换）</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 同步历史对象 -->
+              <div class="form-item">
+                <label class="form-label">
+                  <span class="required">*</span> 同步历史对象
+                  <span class="label-info-icon" title="是否同步开启复制前已存在的历史数据">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="12" y1="16" x2="12" y2="12"/>
+                      <line x1="12" y1="8" x2="12.01" y2="8"/>
+                    </svg>
+                  </span>
+                </label>
+                <div class="form-content">
+                  <div class="segmented-control">
+                    <button 
+                      type="button"
+                      :class="['seg-btn', { active: newRule.historySync === '同步' }]"
+                      @click="newRule.historySync = '同步'"
+                    >
+                      同步
+                    </button>
+                    <button 
+                      type="button"
+                      :class="['seg-btn', { active: newRule.historySync === '不同步' }]"
+                      @click="newRule.historySync = '不同步'"
+                    >
+                      不同步
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 同步删除操作 -->
+              <div class="form-item">
+                <label class="form-label">
+                  <span class="required">*</span> 同步删除操作
+                  <span class="label-info-icon" title="源桶删除对象时是否同步删除目标桶对象">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="12" y1="16" x2="12" y2="12"/>
+                      <line x1="12" y1="8" x2="12.01" y2="8"/>
+                    </svg>
+                  </span>
+                </label>
+                <div class="form-content">
+                  <div class="segmented-control">
+                    <button 
+                      type="button"
+                      :class="['seg-btn', { active: newRule.deleteSync === '同步' }]"
+                      @click="newRule.deleteSync = '同步'"
+                    >
+                      同步
+                    </button>
+                    <button 
+                      type="button"
+                      :class="['seg-btn', { active: newRule.deleteSync === '不同步' }]"
+                      @click="newRule.deleteSync = '不同步'"
+                    >
+                      不同步
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
+
         <div class="modal-footer">
           <button class="btn btn-default" @click="showCreateModal = false">取消</button>
           <button class="btn btn-primary" :disabled="!newRule.targetBucket" @click="createRule">创建</button>
@@ -1360,7 +1658,7 @@
                 <tr>
                   <td>{{ deletingRule?.sourceBucket }}</td>
                   <td>{{ deletingRule?.targetBucket }}</td>
-                  <td><span class="status-tag status-enabled">● {{ deletingRule?.status }}</span></td>
+                  <td><span class="status-tag" :class="deletingRule?.status === '禁用' ? 'status-disabled' : 'status-enabled'">● {{ deletingRule?.status }}</span></td>
                 </tr>
               </tbody>
             </table>
@@ -1453,21 +1751,24 @@
             targetBucket: 'testdcsp',
             scope: '全部对象',
             status: '启用',
-            historySync: '同步'
+            historySync: '同步',
+            deleteSync: '同步'
           },
           {
             sourceBucket: 'jgh-kf-bucket-testpulsar2',
             targetBucket: 'test-1',
-            scope: '前缀: logs/',
+            scope: '全部对象',
             status: '启用',
-            historySync: '不同步'
+            historySync: '不同步',
+            deleteSync: '不同步'
           },
           {
             sourceBucket: 'jgh-kf-bucket-testpulsar2',
             targetBucket: 'xum3-test-20260603',
-            scope: '前缀: backup/',
-            status: '暂停',
-            historySync: '同步'
+            scope: '全部对象',
+            status: '禁用',
+            historySync: '同步',
+            deleteSync: '同步'
           }
         ]
 
@@ -1490,32 +1791,82 @@
           })
         })
 
+        // Bucket metadata map
+        const bucketMeta = {
+          'zyy-kf-bucket-zyy3': { region: '上海', cluster: 'xhgs-stfk' },
+          'jgh-kf-bucket-testpulsar2': { region: '上海', cluster: 'cluster-stdcsp' },
+          'test-1': { region: '上海', cluster: 'cluster-stdcsp' },
+          'testdcsp': { region: '合肥', cluster: 'cluster-stdcsp' },
+          'xum3-test-20260603': { region: '合肥', cluster: 'cluster-stdcsp' },
+          'yangxw-test-qu': { region: '合肥', cluster: 'cluster-stdcsp' },
+          'yangxw-test': { region: '合肥', cluster: 'cluster-stdcsp' },
+          'ystest-7-9': { region: '合肥', cluster: 'cluster-stdcsp' }
+        }
+
+        const allBuckets = [
+          'testdcsp',
+          'test-1',
+          'xum3-test-20260603',
+          'yangxw-test-qu',
+          'yangxw-test',
+          'ystest-7-9',
+          'zyy-kf-bucket-zyy3'
+        ]
+
+        const clusterOptions = ['cluster-stdcsp', 'xhgs-stfk']
+
+        const currentBucketName = ref('zyy-kf-bucket-zyy3')
+
+        const sourceBucketInfo = computed(() => {
+          const info = bucketMeta[currentBucketName.value] || { region: '上海', cluster: 'xhgs-stfk' }
+          return {
+            name: currentBucketName.value,
+            region: info.region,
+            cluster: info.cluster
+          }
+        })
+
+        const targetRegion = computed(() => {
+          return sourceBucketInfo.value.region === '上海' ? '合肥' : '上海'
+        })
+
+        const filteredTargetBuckets = computed(() => {
+          return allBuckets.filter(b => b !== currentBucketName.value)
+        })
+
+        const isAdvancedOpen = ref(true)
+
         // Modals
         const showCreateModal = ref(false)
         const showDeleteModal = ref(false)
         const deletingRule = ref(null)
 
         const newRule = reactive({
+          status: '启用',
+          targetCluster: 'cluster-stdcsp',
           targetBucket: '',
-          scopeType: '全部对象',
-          prefix: '',
+          bidirectional: '是',
           historySync: '同步',
-          status: '启用'
+          deleteSync: '同步'
         })
 
         const createRule = () => {
           if (!newRule.targetBucket) return
           rulesList.value.unshift({
-            sourceBucket: 'jgh-kf-bucket-testpulsar2',
+            sourceBucket: currentBucketName.value,
             targetBucket: newRule.targetBucket,
-            scope: newRule.scopeType === '全部对象' ? '全部对象' : ('前缀: ' + (newRule.prefix || '/')),
+            scope: '全部对象',
             status: newRule.status,
-            historySync: newRule.historySync
+            historySync: newRule.historySync,
+            deleteSync: newRule.deleteSync
           })
           showCreateModal.value = false
           newRule.targetBucket = ''
-          newRule.scopeType = '全部对象'
-          newRule.prefix = ''
+          newRule.targetCluster = 'cluster-stdcsp'
+          newRule.bidirectional = '是'
+          newRule.historySync = '同步'
+          newRule.deleteSync = '同步'
+          newRule.status = '启用'
         }
 
         const openDeleteModal = (rule) => {
@@ -1544,6 +1895,11 @@
           searchKeyword,
           activeFilter,
           filteredRules,
+          sourceBucketInfo,
+          targetRegion,
+          clusterOptions,
+          filteredTargetBuckets,
+          isAdvancedOpen,
           showCreateModal,
           showDeleteModal,
           deletingRule,
