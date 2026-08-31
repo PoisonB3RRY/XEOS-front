@@ -2,7 +2,7 @@
   <div v-if="visible" class="modal-overlay" @click.self="close">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 class="modal-title">删除</h3>
+        <h3 class="modal-title">{{ modalTitle }}</h3>
         <button class="modal-close-btn" @click="close">×</button>
       </div>
 
@@ -15,32 +15,13 @@
             </svg>
           </div>
           <div class="warning-text">
-            <span>{{ warningMessage }}</span>
+            <span>{{ warningContent }}</span>
           </div>
         </div>
 
-        <!-- Strategy Details Table -->
-        <div class="strategy-table-wrapper">
-          <table class="strategy-table">
-            <thead>
-              <tr>
-                <th>源桶</th>
-                <th>目标桶</th>
-                <th>跨域复制策略状态</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>{{ itemData?.sourceBucket || 'test-1' }}</td>
-                <td>{{ itemData?.targetBucket || 'testdcsp' }}</td>
-                <td>
-                  <span class="status-badge" :class="itemData?.status === '禁用' ? 'status-disabled' : 'status-active'">
-                    ● {{ itemData?.status || '启用' }}
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <!-- Confirmation text -->
+        <div class="confirm-prompt-text">
+          {{ confirmContent }}
         </div>
       </div>
 
@@ -53,33 +34,65 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+
 const props = defineProps({
   visible: {
     type: Boolean,
     default: false
   },
+  actionType: {
+    type: String, // 'delete' | 'disable' | 'enable'
+    default: 'delete'
+  },
   itemData: {
     type: Object,
-    default: () => ({
-      sourceBucket: 'jgh-kf-bucket-testpulsar2',
-      targetBucket: 'testdcsp',
-      status: '启用'
-    })
+    default: null
+  },
+  title: {
+    type: String,
+    default: ''
   },
   warningMessage: {
     type: String,
-    default: '确定删除该跨域复制策略？删除后将停止跨区域对象复制。'
+    default: ''
+  },
+  confirmMessage: {
+    type: String,
+    default: ''
   }
 })
 
 const emit = defineEmits(['update:visible', 'confirm'])
+
+const modalTitle = computed(() => {
+  if (props.title) return props.title
+  if (props.actionType === 'disable') return '禁用'
+  if (props.actionType === 'enable') return '启用'
+  return '删除'
+})
+
+const warningContent = computed(() => {
+  if (props.warningMessage) return props.warningMessage
+  if (props.actionType === 'delete') {
+    return '若两桶配置双向跨域复制策略，则默认删除两个桶的跨域复制策略。'
+  }
+  return '若两桶配置双向跨域复制策略，请注意对端桶跨域复制策略状态需保持一致。'
+})
+
+const confirmContent = computed(() => {
+  if (props.confirmMessage) return props.confirmMessage
+  if (props.actionType === 'disable') return '确认要禁用该跨域复制策略？'
+  if (props.actionType === 'enable') return '确认要启用该跨域复制策略？'
+  return '确认要删除该跨域复制策略？'
+})
 
 const close = () => {
   emit('update:visible', false)
 }
 
 const handleConfirm = () => {
-  emit('confirm', props.itemData)
+  emit('confirm', props.itemData, props.actionType)
   close()
 }
 </script>
@@ -96,11 +109,11 @@ const handleConfirm = () => {
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  animation: fadeIn 0.2s ease;
+  animation: fadeIn 0.15s ease;
 }
 
 .modal-card {
-  width: 640px;
+  width: 480px;
   background: #ffffff;
   border-radius: 4px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
@@ -122,6 +135,7 @@ const handleConfirm = () => {
   font-size: 15px;
   font-weight: 600;
   color: #333333;
+  margin: 0;
 }
 
 .modal-close-btn {
@@ -139,83 +153,49 @@ const handleConfirm = () => {
 }
 
 .modal-body {
-  padding: 24px 28px 16px;
+  padding: 20px 24px 16px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .warning-banner {
   background-color: #fffbe6;
   border: 1px solid #ffe58f;
   border-radius: 4px;
-  padding: 12px 16px;
+  padding: 10px 14px;
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 10px;
 }
 
 .warning-icon {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   flex-shrink: 0;
-  margin-top: 2px;
+  margin-top: 1px;
 }
 
 .warning-icon svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
+  display: block;
 }
 
 .warning-text {
-  font-size: 13px;
-  color: #333333;
-  line-height: 1.6;
-}
-
-.strategy-table-wrapper {
-  border: 1px solid #f0f0f0;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.strategy-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-.strategy-table th {
-  background-color: #fafafa;
-  color: #555555;
-  text-align: left;
-  padding: 10px 16px;
-  font-weight: 500;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.strategy-table td {
-  padding: 12px 16px;
-  color: #333333;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.status-badge {
-  display: inline-flex;
-  align-items: center;
   font-size: 12px;
+  color: #333333;
+  line-height: 1.5;
 }
 
-.status-active {
-  color: #52c41a;
-}
-
-.status-disabled {
-  color: #faad14;
+.confirm-prompt-text {
+  font-size: 13px;
+  color: #333333;
+  padding-left: 2px;
 }
 
 .modal-footer {
-  padding: 16px 28px 24px;
+  padding: 12px 24px 20px;
   display: flex;
   justify-content: flex-end;
   gap: 12px;
@@ -223,7 +203,7 @@ const handleConfirm = () => {
 
 .btn {
   height: 32px;
-  padding: 0 20px;
+  padding: 0 18px;
   border-radius: 4px;
   font-size: 13px;
   cursor: pointer;

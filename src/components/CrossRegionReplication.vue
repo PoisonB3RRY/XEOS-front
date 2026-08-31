@@ -77,10 +77,13 @@
             <td class="col-delete-op">{{ rule.deleteSync || '同步' }}</td>
             <td class="col-op">
               <div class="op-links">
-                <a class="op-link" @click="toggleRuleStatus(rule)">
+                <a 
+                  class="op-link" 
+                  @click="openActionModal(rule, rule.status === '启用' ? 'disable' : 'enable')"
+                >
                   {{ rule.status === '启用' ? '禁用' : '启用' }}
                 </a>
-                <a class="op-link delete" @click="openDeleteModal(rule)">删除</a>
+                <a class="op-link delete" @click="openActionModal(rule, 'delete')">删除</a>
               </div>
             </td>
           </tr>
@@ -125,12 +128,12 @@
       @submit="handleCreateRule"
     />
 
-    <!-- Delete Confirmation Modal -->
+    <!-- Action Confirmation Modal (Delete / Disable / Enable) -->
     <DeleteConfirmModal 
-      v-model:visible="showDeleteModal"
-      :item-data="deletingRule"
-      :warning-message="`存在以桶${deletingRule?.targetBucket || ''}为目标桶的跨域复制策略，该策略删除后将停止向目标桶同步数据。`"
-      @confirm="handleConfirmDelete"
+      v-model:visible="showActionModal"
+      :action-type="actionType"
+      :item-data="targetRule"
+      @confirm="handleConfirmAction"
     />
   </div>
 </template>
@@ -188,8 +191,9 @@ const searchKeyword = ref('')
 const activeFilter = ref('')
 
 const showCreateModal = ref(false)
-const showDeleteModal = ref(false)
-const deletingRule = ref(null)
+const showActionModal = ref(false)
+const actionType = ref('delete') // 'delete' | 'disable' | 'enable'
+const targetRule = ref(null)
 
 const filteredRules = computed(() => {
   if (!activeFilter.value) return rulesList.value
@@ -220,17 +224,22 @@ const handleCreateRule = (newRule) => {
   rulesList.value.unshift(newRule)
 }
 
-const toggleRuleStatus = (rule) => {
-  rule.status = rule.status === '启用' ? '禁用' : '启用'
+const openActionModal = (rule, type) => {
+  targetRule.value = rule
+  actionType.value = type
+  showActionModal.value = true
 }
 
-const openDeleteModal = (rule) => {
-  deletingRule.value = rule
-  showDeleteModal.value = true
-}
-
-const handleConfirmDelete = (rule) => {
-  rulesList.value = rulesList.value.filter(r => r !== rule)
+const handleConfirmAction = (rule, type) => {
+  if (!targetRule.value) return
+  const currentRule = targetRule.value
+  if (type === 'delete') {
+    rulesList.value = rulesList.value.filter(r => r !== currentRule)
+  } else if (type === 'disable') {
+    currentRule.status = '禁用'
+  } else if (type === 'enable') {
+    currentRule.status = '启用'
+  }
 }
 </script>
 

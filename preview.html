@@ -772,8 +772,15 @@
       display: flex;
       flex-direction: column;
     }
-    .modal-card.delete-modal {
-      width: 640px;
+    .modal-card.delete-modal,
+    .modal-card.action-modal {
+      width: 480px;
+    }
+    .confirm-prompt-text {
+      font-size: 13px;
+      color: #333333;
+      padding-left: 2px;
+      margin-top: 4px;
     }
     .modal-header {
       height: 48px;
@@ -1339,10 +1346,10 @@
                       <td class="col-delete-op">{{ rule.deleteSync || '同步' }}</td>
                       <td class="col-op">
                         <div class="op-links">
-                          <a class="op-link" @click="rule.status = rule.status === '启用' ? '禁用' : '启用'">
+                          <a class="op-link" @click="openActionModal(rule, rule.status === '启用' ? 'disable' : 'enable')">
                             {{ rule.status === '启用' ? '禁用' : '启用' }}
                           </a>
-                          <a class="op-link delete" @click="openDeleteModal(rule)">删除</a>
+                          <a class="op-link delete" @click="openActionModal(rule, 'delete')">删除</a>
                         </div>
                       </td>
                     </tr>
@@ -1635,12 +1642,12 @@
       </div>
     </div>
 
-    <!-- Delete Confirmation Modal (matching CCR桶删除确认页.png) -->
-    <div v-if="showDeleteModal" class="modal-overlay" @click.self="showDeleteModal = false">
-      <div class="modal-card delete-modal">
+    <!-- Action Confirmation Modal (matching Delete / Disable / Enable screenshots) -->
+    <div v-if="showActionModal" class="modal-overlay" @click.self="showActionModal = false">
+      <div class="modal-card action-modal">
         <div class="modal-header">
-          <h3 class="modal-title">删除</h3>
-          <button class="modal-close-btn" @click="showDeleteModal = false">×</button>
+          <h3 class="modal-title">{{ actionModalTitle }}</h3>
+          <button class="modal-close-btn" @click="showActionModal = false">×</button>
         </div>
         <div class="modal-body">
           <div class="warning-banner">
@@ -1648,25 +1655,16 @@
               <svg viewBox="0 0 24 24" fill="#fa8c16"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
             </div>
             <div class="warning-text">
-              存在以桶 <b>{{ deletingRule?.targetBucket }}</b> 为目标桶的跨域复制策略，该策略删除后将停止向目标桶同步数据。
+              {{ actionModalWarning }}
             </div>
           </div>
-          <div class="strategy-table-wrapper">
-            <table class="strategy-table">
-              <thead><tr><th>源桶</th><th>目标桶</th><th>跨域复制策略状态</th></tr></thead>
-              <tbody>
-                <tr>
-                  <td>{{ deletingRule?.sourceBucket }}</td>
-                  <td>{{ deletingRule?.targetBucket }}</td>
-                  <td><span class="status-tag" :class="deletingRule?.status === '禁用' ? 'status-disabled' : 'status-enabled'">● {{ deletingRule?.status }}</span></td>
-                </tr>
-              </tbody>
-            </table>
+          <div class="confirm-prompt-text">
+            {{ actionModalConfirm }}
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-default" @click="showDeleteModal = false">取消</button>
-          <button class="btn btn-primary" @click="confirmDelete">确定</button>
+          <button class="btn btn-default" @click="showActionModal = false">取消</button>
+          <button class="btn btn-primary" @click="handleConfirmAction">确定</button>
         </div>
       </div>
     </div>
@@ -1838,8 +1836,28 @@
 
         // Modals
         const showCreateModal = ref(false)
-        const showDeleteModal = ref(false)
-        const deletingRule = ref(null)
+        const showActionModal = ref(false)
+        const currentActionType = ref('delete') // 'delete' | 'disable' | 'enable'
+        const currentActionRule = ref(null)
+
+        const actionModalTitle = computed(() => {
+          if (currentActionType.value === 'disable') return '禁用'
+          if (currentActionType.value === 'enable') return '启用'
+          return '删除'
+        })
+
+        const actionModalWarning = computed(() => {
+          if (currentActionType.value === 'delete') {
+            return '若两桶配置双向跨域复制策略，则默认删除两个桶的跨域复制策略。'
+          }
+          return '若两桶配置双向跨域复制策略，请注意对端桶跨域复制策略状态需保持一致。'
+        })
+
+        const actionModalConfirm = computed(() => {
+          if (currentActionType.value === 'disable') return '确认要禁用该跨域复制策略？'
+          if (currentActionType.value === 'enable') return '确认要启用该跨域复制策略？'
+          return '确认要删除该跨域复制策略？'
+        })
 
         const newRule = reactive({
           status: '启用',
@@ -1869,14 +1887,23 @@
           newRule.status = '启用'
         }
 
-        const openDeleteModal = (rule) => {
-          deletingRule.value = rule
-          showDeleteModal.value = true
+        const openActionModal = (rule, type) => {
+          currentActionRule.value = rule
+          currentActionType.value = type
+          showActionModal.value = true
         }
 
-        const confirmDelete = () => {
-          rulesList.value = rulesList.value.filter(r => r !== deletingRule.value)
-          showDeleteModal.value = false
+        const handleConfirmAction = () => {
+          if (!currentActionRule.value) return
+          const target = currentActionRule.value
+          if (currentActionType.value === 'delete') {
+            rulesList.value = rulesList.value.filter(r => r !== target)
+          } else if (currentActionType.value === 'disable') {
+            target.status = '禁用'
+          } else if (currentActionType.value === 'enable') {
+            target.status = '启用'
+          }
+          showActionModal.value = false
         }
 
         return {
@@ -1901,12 +1928,16 @@
           filteredTargetBuckets,
           isAdvancedOpen,
           showCreateModal,
-          showDeleteModal,
-          deletingRule,
+          showActionModal,
+          currentActionType,
+          currentActionRule,
+          actionModalTitle,
+          actionModalWarning,
+          actionModalConfirm,
           newRule,
           createRule,
-          openDeleteModal,
-          confirmDelete
+          openActionModal,
+          handleConfirmAction
         }
       }
     }).mount('#app')
