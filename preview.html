@@ -1009,6 +1009,105 @@
     .prefix-input-wrap {
       margin-top: 8px;
     }
+    .form-textarea {
+      width: 100%;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      padding: 8px 10px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #333333;
+      outline: none;
+      background-color: #ffffff;
+      transition: all 0.2s;
+      resize: vertical;
+      box-sizing: border-box;
+    }
+    .form-textarea:focus {
+      border-color: #2468f2;
+      box-shadow: 0 0 0 2px rgba(36, 104, 242, 0.1);
+    }
+    .input-with-suffix {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+    .input-suffix-target {
+      padding-right: 32px;
+    }
+    .input-suffix {
+      position: absolute;
+      right: 12px;
+      font-size: 13px;
+      color: #888888;
+      pointer-events: none;
+    }
+    .help-link {
+      font-size: 12px;
+      color: #2468f2;
+      text-decoration: none;
+    }
+    .help-link:hover {
+      text-decoration: underline;
+    }
+    .section-group {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .section-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+      color: #333333;
+      font-size: 13px;
+      margin-bottom: 2px;
+    }
+    .section-divider {
+      height: 1px;
+      background-color: #f0f0f0;
+      margin: 4px 0;
+    }
+    .input-disabled {
+      background-color: #f5f5f5 !important;
+      color: #999999 !important;
+      cursor: not-allowed;
+      border-color: #e4e7ed !important;
+    }
+    .checkbox-input-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    .checkbox-label input[type="checkbox"] {
+      width: 15px;
+      height: 15px;
+      cursor: pointer;
+    }
+    .input-wrap {
+      display: flex;
+      align-items: center;
+      flex: 1;
+    }
+    .input-number {
+      max-width: 260px;
+    }
+    .inline-icon {
+      margin-left: 8px;
+    }
+    .danger-tip-text {
+      font-size: 12px;
+      color: #e65252;
+      line-height: 1.5;
+      margin-top: 2px;
+    }
     .modal-footer {
       padding: 12px 24px 20px;
       display: flex;
@@ -1413,6 +1512,182 @@
               </div>
             </div>
 
+            <!-- Tab 4: 生命周期管理 (Lifecycle Management from photo) -->
+            <div v-else-if="currentSubTab === 'lifecycle'" class="ccr-container">
+              <div class="action-bar">
+                <div class="left-actions">
+                  <button class="btn-create" @click="showLifecycleCreateModal = true">
+                    <svg class="plus-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <span>创建</span>
+                  </button>
+                </div>
+                <div class="search-filter-wrap">
+                  <select v-model="lifecycleSearchType" class="search-select">
+                    <option value="ruleName">规则名称</option>
+                  </select>
+                  <input 
+                    type="text" 
+                    v-model="lifecycleSearchKeyword" 
+                    placeholder="请输入" 
+                    class="search-input" 
+                    @keyup.enter="lifecycleActiveFilter = lifecycleSearchKeyword"
+                  />
+                  <button class="btn-search" @click="lifecycleActiveFilter = lifecycleSearchKeyword">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <span>查询</span>
+                  </button>
+                  <button class="btn-reset" @click="lifecycleSearchKeyword = ''; lifecycleActiveFilter = ''">重置</button>
+                  <button class="btn-refresh" title="刷新">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+                      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Table -->
+              <div class="table-card">
+                <table class="ccr-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 20%;">规则名称</th>
+                      <th style="width: 14%;">状态</th>
+                      <th style="width: 15%;">规则生效范围</th>
+                      <th style="width: 15%;">前缀</th>
+                      <th style="width: 14%;">对象版本</th>
+                      <th style="width: 12%;">对象过期删除天数</th>
+                      <th v-if="filteredLifecycleRules.length > 0" style="width: 10%; text-align: right;">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody v-if="filteredLifecycleRules.length > 0">
+                    <tr v-for="(rule, idx) in filteredLifecycleRules" :key="idx">
+                      <td>{{ rule.ruleName }}</td>
+                      <td>
+                        <span :class="['status-tag', rule.status === '启用' ? 'status-enabled' : 'status-disabled']">
+                          ● {{ rule.status === '启用' ? '已启用' : '已禁用' }}
+                        </span>
+                      </td>
+                      <td>{{ rule.scope }}</td>
+                      <td>{{ rule.prefix }}</td>
+                      <td>{{ rule.objectVersion }}</td>
+                      <td>{{ rule.expireDays }}</td>
+                      <td style="text-align: right;">
+                        <div class="op-links">
+                          <a class="op-link delete" @click="openLifecycleActionModal(rule, 'delete')">删除</a>
+                          <a class="op-link" @click="openLifecycleActionModal(rule, rule.status === '启用' ? 'disable' : 'enable')">
+                            {{ rule.status === '启用' ? '禁用' : '启用' }}
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <!-- Empty State -->
+                <div v-if="filteredLifecycleRules.length === 0" class="empty-state">
+                  <div class="empty-icon-wrap">
+                    <svg viewBox="0 0 120 100" class="empty-box-svg">
+                      <path d="M25 45 L95 45 L85 85 L35 85 Z" fill="#f0f3f6" stroke="#d5dbe2" stroke-width="1.5" />
+                      <path d="M25 45 L40 60 L80 60 L95 45" fill="#e4e9f0" stroke="#d5dbe2" stroke-width="1.5" />
+                      <path d="M25 45 L15 32 L48 32 L40 45" fill="#f5f7fa" stroke="#d5dbe2" stroke-width="1.5" />
+                      <path d="M95 45 L105 32 L72 32 L80 45" fill="#f5f7fa" stroke="#d5dbe2" stroke-width="1.5" />
+                      <line x1="45" y1="52" x2="75" y2="52" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round" />
+                      <line x1="50" y1="58" x2="70" y2="58" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                  </div>
+                  <div class="empty-text">暂无数据</div>
+                </div>
+              </div>
+
+              <!-- Pagination -->
+              <div v-if="filteredLifecycleRules.length > 0" class="table-footer">
+                <div class="total-info">共 {{ filteredLifecycleRules.length }} 条</div>
+                <div class="pagination">
+                  <button class="page-nav-btn disabled">&lt;</button>
+                  <button class="page-number active">1</button>
+                  <button class="page-nav-btn disabled">&gt;</button>
+                  <div class="page-size-select">10 条/页 ▾</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab 5: CORS管理 (CORS Management from photo) -->
+            <div v-else-if="currentSubTab === 'cors'" class="ccr-container">
+              <div class="action-bar">
+                <div class="left-actions">
+                  <button class="btn-create" @click="showCorsCreateModal = true">
+                    <svg class="plus-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <span>创建</span>
+                  </button>
+                </div>
+                <div class="right-tools">
+                  <button class="btn-refresh" title="刷新列表">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+                      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Table -->
+              <div class="table-card">
+                <table class="ccr-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 26%;">允许的来源</th>
+                      <th style="width: 18%;">允许的方法</th>
+                      <th style="width: 18%;">允许的头域</th>
+                      <th style="width: 18%;">补充头域</th>
+                      <th style="width: 12%;">缓存时间(秒)</th>
+                      <th v-if="corsRulesList.length > 0" style="width: 8%; text-align: right;">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody v-if="corsRulesList.length > 0">
+                    <tr v-for="(rule, idx) in corsRulesList" :key="idx">
+                      <td>{{ rule.origins }}</td>
+                      <td>{{ rule.methods }}</td>
+                      <td>{{ rule.headers || '--' }}</td>
+                      <td>{{ rule.exposeHeaders || '--' }}</td>
+                      <td>{{ rule.maxAge }}</td>
+                      <td style="text-align: right;">
+                        <a class="op-link delete" @click="openCorsDeleteModal(rule)">删除</a>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <!-- Empty State -->
+                <div v-if="corsRulesList.length === 0" class="empty-state">
+                  <div class="empty-icon-wrap">
+                    <svg viewBox="0 0 120 100" class="empty-box-svg">
+                      <path d="M25 45 L95 45 L85 85 L35 85 Z" fill="#f0f3f6" stroke="#d5dbe2" stroke-width="1.5" />
+                      <path d="M25 45 L40 60 L80 60 L95 45" fill="#e4e9f0" stroke="#d5dbe2" stroke-width="1.5" />
+                      <path d="M25 45 L15 32 L48 32 L40 45" fill="#f5f7fa" stroke="#d5dbe2" stroke-width="1.5" />
+                      <path d="M95 45 L105 32 L72 32 L80 45" fill="#f5f7fa" stroke="#d5dbe2" stroke-width="1.5" />
+                      <line x1="45" y1="52" x2="75" y2="52" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round" />
+                      <line x1="50" y1="58" x2="70" y2="58" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                  </div>
+                  <div class="empty-text">暂无数据</div>
+                </div>
+              </div>
+
+              <!-- Pagination -->
+              <div v-if="corsRulesList.length > 0" class="table-footer">
+                <div class="total-info">共 {{ corsRulesList.length }} 条</div>
+                <div class="pagination">
+                  <button class="page-nav-btn disabled">&lt;</button>
+                  <button class="page-number active">1</button>
+                  <button class="page-nav-btn disabled">&gt;</button>
+                  <div class="page-size-select">10 条/页 ▾</div>
+                </div>
+              </div>
+            </div>
+
             <!-- Other tabs -->
             <div v-else style="padding: 80px 20px; text-align: center; color: #909399;">
               <div style="font-size: 36px; margin-bottom: 8px;">📋</div>
@@ -1668,6 +1943,429 @@
         </div>
       </div>
     </div>
+
+    <!-- Lifecycle Create Modal (Image 1 - Updated 3 sections) -->
+    <div v-if="showLifecycleCreateModal" class="modal-overlay" @click.self="showLifecycleCreateModal = false">
+      <div class="modal-card" style="width: 640px;">
+        <div class="modal-header">
+          <div class="title-wrap">
+            <h3 class="modal-title">创建生命周期规则</h3>
+            <a class="help-link" href="javascript:void(0);">如何配置?</a>
+          </div>
+          <button class="modal-close-btn" @click="showLifecycleCreateModal = false">×</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- 1. 基本信息 -->
+          <div class="section-group">
+            <!-- 状态 -->
+            <div class="form-item">
+              <label class="form-label"><span class="required">*</span> 状态</label>
+              <div class="form-content">
+                <div class="radio-group">
+                  <label class="radio-label">
+                    <input type="radio" value="启用" v-model="newLifecycleRule.status" />
+                    <span>启用</span>
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" value="禁用" v-model="newLifecycleRule.status" />
+                    <span>禁用</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- 规则名称 -->
+            <div class="form-item">
+              <label class="form-label"><span class="required">*</span> 规则名称</label>
+              <div class="form-content">
+                <input 
+                  type="text" 
+                  v-model="newLifecycleRule.ruleName" 
+                  placeholder="请输入规则名称" 
+                  class="form-input" 
+                  maxlength="128"
+                />
+              </div>
+            </div>
+
+            <!-- 生效范围 -->
+            <div class="form-item">
+              <label class="form-label">
+                <span class="required">*</span> 生效范围
+                <span class="label-info-icon" title="配置规则是应用于整桶还是按前缀过滤">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                  </svg>
+                </span>
+              </label>
+              <div class="form-content">
+                <div class="segmented-control">
+                  <button 
+                    type="button"
+                    :class="['seg-btn', { active: newLifecycleRule.scope === '整桶' }]"
+                    @click="newLifecycleRule.scope = '整桶'"
+                  >
+                    整桶
+                  </button>
+                  <button 
+                    type="button"
+                    :class="['seg-btn', { active: newLifecycleRule.scope === '前缀' }]"
+                    @click="newLifecycleRule.scope = '前缀'"
+                  >
+                    前缀
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 前缀 (整桶时置灰而非隐藏) -->
+            <div class="form-item">
+              <label class="form-label">
+                <span class="required" v-if="newLifecycleRule.scope === '前缀'">*</span> 前缀
+                <span class="label-info-icon" title="匹配指定前缀的对象">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                  </svg>
+                </span>
+              </label>
+              <div class="form-content">
+                <input 
+                  type="text" 
+                  v-model="newLifecycleRule.prefix" 
+                  :disabled="newLifecycleRule.scope === '整桶'"
+                  :placeholder="newLifecycleRule.scope === '整桶' ? '' : '请输入对象名前缀'" 
+                  :class="['form-input', { 'input-disabled': newLifecycleRule.scope === '整桶' }]"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="section-divider"></div>
+
+          <!-- 2. 当前版本 -->
+          <div class="section-group">
+            <div class="section-title-wrap">
+              <span class="section-title">当前版本</span>
+            </div>
+
+            <!-- 当前版本：对象过期删除天数 -->
+            <div class="form-item">
+              <label class="form-label">对象过期删除天数</label>
+              <div class="form-content">
+                <div class="checkbox-input-row">
+                  <label class="checkbox-label">
+                    <input type="checkbox" v-model="newLifecycleRule.enableCurrentExpire" />
+                  </label>
+                  <div class="input-wrap">
+                    <input 
+                      type="number" 
+                      v-model.number="newLifecycleRule.currentExpireDays" 
+                      :disabled="!newLifecycleRule.enableCurrentExpire"
+                      placeholder="30" 
+                      :class="['form-input', 'input-number', { 'input-disabled': !newLifecycleRule.enableCurrentExpire }]"
+                      min="1"
+                    />
+                    <span class="label-info-icon inline-icon" title="指定当前版本对象在多少天后自动过期删除">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="16" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                      </svg>
+                    </span>
+                  </div>
+                </div>
+                <div class="danger-tip-text">
+                  说明：当桶未启用多版本控制时，指定的对象在配置的过期时间后将被自动删除，无法找回。
+                </div>
+              </div>
+            </div>
+
+            <!-- 当前版本：碎片过期删除天数 -->
+            <div class="form-item">
+              <label class="form-label">碎片过期删除天数</label>
+              <div class="form-content">
+                <div class="checkbox-input-row">
+                  <label class="checkbox-label">
+                    <input type="checkbox" v-model="newLifecycleRule.enableCurrentFragmentExpire" />
+                  </label>
+                  <div class="input-wrap">
+                    <input 
+                      type="number" 
+                      v-model.number="newLifecycleRule.currentFragmentExpireDays" 
+                      :disabled="!newLifecycleRule.enableCurrentFragmentExpire"
+                      placeholder="30" 
+                      :class="['form-input', 'input-number', { 'input-disabled': !newLifecycleRule.enableCurrentFragmentExpire }]"
+                      min="1"
+                    />
+                    <span class="label-info-icon inline-icon" title="指定未完成的分段上传碎片在多少天后自动清理">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="16" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                      </svg>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-divider"></div>
+
+          <!-- 3. 历史版本 -->
+          <div class="section-group">
+            <div class="section-title-wrap">
+              <span class="section-title">历史版本</span>
+              <span class="label-info-icon" title="历史版本生命周期策略">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="16" x2="12" y2="12"/>
+                  <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+              </span>
+            </div>
+
+            <!-- 历史版本：对象过期删除天数 -->
+            <div class="form-item">
+              <label class="form-label">对象过期删除天数</label>
+              <div class="form-content">
+                <div class="checkbox-input-row">
+                  <label class="checkbox-label">
+                    <input type="checkbox" v-model="newLifecycleRule.enableHistoryExpire" />
+                  </label>
+                  <div class="input-wrap">
+                    <input 
+                      type="number" 
+                      v-model.number="newLifecycleRule.historyExpireDays" 
+                      :disabled="!newLifecycleRule.enableHistoryExpire"
+                      placeholder="30" 
+                      :class="['form-input', 'input-number', { 'input-disabled': !newLifecycleRule.enableHistoryExpire }]"
+                      min="1"
+                    />
+                    <span class="label-info-icon inline-icon" title="指定历史版本对象在成为非当前版本后多少天自动永久删除">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="16" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                      </svg>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button 
+            class="btn btn-primary" 
+            :disabled="!newLifecycleRule.ruleName || (newLifecycleRule.scope === '前缀' && !newLifecycleRule.prefix) || (!newLifecycleRule.enableCurrentExpire && !newLifecycleRule.enableCurrentFragmentExpire && !newLifecycleRule.enableHistoryExpire)" 
+            @click="createLifecycleRule"
+          >
+            确定
+          </button>
+          <button class="btn btn-default" @click="showLifecycleCreateModal = false">取消</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lifecycle Action Modal -->
+    <div v-if="showLifecycleActionModal" class="modal-overlay" @click.self="showLifecycleActionModal = false">
+      <div class="modal-card action-modal">
+        <div class="modal-header">
+          <h3 class="modal-title">{{ lifecycleActionTitle }}</h3>
+          <button class="modal-close-btn" @click="showLifecycleActionModal = false">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="warning-banner">
+            <div class="warning-icon">
+              <svg viewBox="0 0 24 24" fill="#fa8c16"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            </div>
+            <div class="warning-text">
+              {{ lifecycleActionWarning }}
+            </div>
+          </div>
+          <div class="confirm-prompt-text">
+            {{ lifecycleActionConfirm }}
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-default" @click="showLifecycleActionModal = false">取消</button>
+          <button class="btn btn-primary" @click="handleConfirmLifecycleAction">确定</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CORS Create Modal (Image 1) -->
+    <div v-if="showCorsCreateModal" class="modal-overlay" @click.self="showCorsCreateModal = false">
+      <div class="modal-card" style="width: 580px;">
+        <div class="modal-header">
+          <div class="title-wrap">
+            <h3 class="modal-title">创建CORS规则</h3>
+          </div>
+          <button class="modal-close-btn" @click="showCorsCreateModal = false">×</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- 1. 允许的来源 -->
+          <div class="form-item">
+            <label class="form-label">
+              <span class="required">*</span> 允许的来源
+              <span class="label-info-icon" title="指定允许跨域请求的来源域名，如 https://www.example.com，支持通配符 *">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="16" x2="12" y2="12"/>
+                  <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+              </span>
+            </label>
+            <div class="form-content">
+              <textarea 
+                v-model="newCorsRule.origins" 
+                placeholder="https://www.example.com" 
+                class="form-textarea"
+                rows="3"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- 2. 允许的方法 -->
+          <div class="form-item">
+            <label class="form-label">
+              <span class="required">*</span> 允许的方法
+              <span class="label-info-icon" title="指定允许的跨域 HTTP 方法">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="16" x2="12" y2="12"/>
+                  <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+              </span>
+            </label>
+            <div class="form-content">
+              <select v-model="newCorsRule.methods" class="form-select">
+                <option value="" disabled>请选择</option>
+                <option value="GET">GET</option>
+                <option value="PUT">PUT</option>
+                <option value="POST">POST</option>
+                <option value="DELETE">DELETE</option>
+                <option value="HEAD">HEAD</option>
+                <option value="GET, PUT, POST, DELETE, HEAD">全部方法 (GET, PUT, POST, DELETE, HEAD)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 3. 允许的头域 -->
+          <div class="form-item">
+            <label class="form-label">
+              允许的头域
+              <span class="label-info-icon" title="指定允许客户端在跨域请求中携带的请求头">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="16" x2="12" y2="12"/>
+                  <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+              </span>
+            </label>
+            <div class="form-content">
+              <textarea 
+                v-model="newCorsRule.headers" 
+                placeholder="请输入" 
+                class="form-textarea"
+                rows="3"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- 4. 补充头域 -->
+          <div class="form-item">
+            <label class="form-label">
+              补充头域
+              <span class="label-info-icon" title="指定允许客户端访问的响应头（暴露给浏览器的头域）">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="16" x2="12" y2="12"/>
+                  <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+              </span>
+            </label>
+            <div class="form-content">
+              <textarea 
+                v-model="newCorsRule.exposeHeaders" 
+                placeholder="请输入" 
+                class="form-textarea"
+                rows="3"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- 5. 缓存时间(秒) -->
+          <div class="form-item">
+            <label class="form-label">
+              <span class="required">*</span> 缓存时间(秒)
+              <span class="label-info-icon" title="指定浏览器对特定预检请求返回结果的缓存时间（秒）">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="16" x2="12" y2="12"/>
+                  <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+              </span>
+            </label>
+            <div class="form-content">
+              <input 
+                type="number" 
+                v-model.number="newCorsRule.maxAge" 
+                placeholder="100" 
+                class="form-input"
+                min="0"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-default" @click="showCorsCreateModal = false">取消</button>
+          <button 
+            class="btn btn-primary" 
+            :disabled="!newCorsRule.origins || !newCorsRule.methods || newCorsRule.maxAge === '' || newCorsRule.maxAge === null || newCorsRule.maxAge < 0" 
+            @click="createCorsRule"
+          >
+            创建
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CORS Delete Modal -->
+    <div v-if="showCorsDeleteModal" class="modal-overlay" @click.self="showCorsDeleteModal = false">
+      <div class="modal-card action-modal">
+        <div class="modal-header">
+          <h3 class="modal-title">删除CORS规则</h3>
+          <button class="modal-close-btn" @click="showCorsDeleteModal = false">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="warning-banner">
+            <div class="warning-icon">
+              <svg viewBox="0 0 24 24" fill="#fa8c16"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            </div>
+            <div class="warning-text">
+              删除CORS规则后，跨域访问该存储桶的相关跨域请求将受到限制。
+            </div>
+          </div>
+          <div class="confirm-prompt-text">
+            确认要删除该CORS规则吗？
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-default" @click="showCorsDeleteModal = false">取消</button>
+          <button class="btn btn-primary" @click="confirmDeleteCorsRule">确定</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -1739,7 +2437,6 @@
           { id: 'auth', name: '授权管理' },
           { id: 'lifecycle', name: '生命周期管理' },
           { id: 'ccr', name: '跨域复制管理' },
-          { id: 'migration', name: '迁移管理' },
           { id: 'cors', name: 'CORS管理' }
         ]
 
@@ -1788,6 +2485,175 @@
             }
           })
         })
+
+        // Lifecycle Rules State (Image 2)
+        const sampleLifecycleRules = [
+          {
+            ruleName: 'yangxwtest',
+            status: '启用',
+            scope: '整桶',
+            prefix: '-',
+            objectVersion: '历史版本',
+            expireDays: 1
+          }
+        ]
+
+        const lifecycleRulesList = ref([...sampleLifecycleRules])
+        const lifecycleSearchType = ref('ruleName')
+        const lifecycleSearchKeyword = ref('')
+        const lifecycleActiveFilter = ref('')
+
+        const filteredLifecycleRules = computed(() => {
+          if (!lifecycleActiveFilter.value) return lifecycleRulesList.value
+          const kw = lifecycleActiveFilter.value.toLowerCase().trim()
+          return lifecycleRulesList.value.filter(r => r.ruleName.toLowerCase().includes(kw))
+        })
+
+        const showLifecycleCreateModal = ref(false)
+        const showLifecycleActionModal = ref(false)
+        const lifecycleActionType = ref('delete')
+        const currentLifecycleRule = ref(null)
+
+        const newLifecycleRule = reactive({
+          status: '启用',
+          ruleName: '',
+          scope: '整桶',
+          prefix: '',
+          enableCurrentExpire: false,
+          currentExpireDays: 30,
+          enableCurrentFragmentExpire: false,
+          currentFragmentExpireDays: 30,
+          enableHistoryExpire: false,
+          historyExpireDays: 30
+        })
+
+        const createLifecycleRule = () => {
+          if (!newLifecycleRule.ruleName) return
+          const hasPolicy = newLifecycleRule.enableCurrentExpire || newLifecycleRule.enableCurrentFragmentExpire || newLifecycleRule.enableHistoryExpire
+          if (!hasPolicy) return
+
+          const versions = []
+          if (newLifecycleRule.enableCurrentExpire || newLifecycleRule.enableCurrentFragmentExpire) versions.push('当前版本')
+          if (newLifecycleRule.enableHistoryExpire) versions.push('历史版本')
+
+          const expireDays = newLifecycleRule.enableCurrentExpire 
+            ? newLifecycleRule.currentExpireDays 
+            : (newLifecycleRule.enableHistoryExpire ? newLifecycleRule.historyExpireDays : (newLifecycleRule.enableCurrentFragmentExpire ? newLifecycleRule.currentFragmentExpireDays : 30))
+
+          lifecycleRulesList.value.unshift({
+            ruleName: newLifecycleRule.ruleName.trim(),
+            status: newLifecycleRule.status,
+            scope: newLifecycleRule.scope,
+            prefix: newLifecycleRule.scope === '前缀' ? newLifecycleRule.prefix.trim() : '-',
+            objectVersion: versions.join(', ') || '当前版本',
+            expireDays: expireDays
+          })
+          showLifecycleCreateModal.value = false
+          newLifecycleRule.ruleName = ''
+          newLifecycleRule.prefix = ''
+          newLifecycleRule.scope = '整桶'
+          newLifecycleRule.status = '启用'
+          newLifecycleRule.enableCurrentExpire = false
+          newLifecycleRule.currentExpireDays = 30
+          newLifecycleRule.enableCurrentFragmentExpire = false
+          newLifecycleRule.currentFragmentExpireDays = 30
+          newLifecycleRule.enableHistoryExpire = false
+          newLifecycleRule.historyExpireDays = 30
+        }
+
+        const openLifecycleActionModal = (rule, type) => {
+          currentLifecycleRule.value = rule
+          lifecycleActionType.value = type
+          showLifecycleActionModal.value = true
+        }
+
+        const lifecycleActionTitle = computed(() => {
+          if (lifecycleActionType.value === 'disable') return '禁用生命周期规则'
+          if (lifecycleActionType.value === 'enable') return '启用生命周期规则'
+          return '删除生命周期规则'
+        })
+
+        const lifecycleActionWarning = computed(() => {
+          if (lifecycleActionType.value === 'delete') {
+            return '删除生命周期规则后，相关对象的自动生命周期策略将停止执行。'
+          } else if (lifecycleActionType.value === 'disable') {
+            return '禁用后该生命周期规则将暂停执行。'
+          }
+          return '启用后该生命周期规则将恢复执行。'
+        })
+
+        const lifecycleActionConfirm = computed(() => {
+          const name = currentLifecycleRule.value?.ruleName || ''
+          if (lifecycleActionType.value === 'disable') return `确认要禁用生命周期规则“${name}”吗？`
+          if (lifecycleActionType.value === 'enable') return `确认要启用生命周期规则“${name}”吗？`
+          return `确认要删除生命周期规则“${name}”吗？`
+        })
+
+        const handleConfirmLifecycleAction = () => {
+          if (!currentLifecycleRule.value) return
+          const target = currentLifecycleRule.value
+          if (lifecycleActionType.value === 'delete') {
+            lifecycleRulesList.value = lifecycleRulesList.value.filter(r => r !== target)
+          } else if (lifecycleActionType.value === 'disable') {
+            target.status = '禁用'
+          } else if (lifecycleActionType.value === 'enable') {
+            target.status = '启用'
+          }
+          showLifecycleActionModal.value = false
+        }
+
+        // CORS Rules State (Image 2)
+        const sampleCorsRules = [
+          {
+            origins: 'https://www.com.com',
+            methods: 'Delete',
+            headers: '--',
+            exposeHeaders: '--',
+            maxAge: 100
+          }
+        ]
+
+        const corsRulesList = ref([...sampleCorsRules])
+        const showCorsCreateModal = ref(false)
+        const showCorsDeleteModal = ref(false)
+        const deletingCorsRule = ref(null)
+
+        const newCorsRule = reactive({
+          origins: '',
+          methods: '',
+          headers: '',
+          exposeHeaders: '',
+          maxAge: 100
+        })
+
+        const createCorsRule = () => {
+          if (!newCorsRule.origins || !newCorsRule.methods) return
+          corsRulesList.value.unshift({
+            origins: newCorsRule.origins.trim(),
+            methods: newCorsRule.methods,
+            headers: newCorsRule.headers.trim() || '--',
+            exposeHeaders: newCorsRule.exposeHeaders.trim() || '--',
+            maxAge: Number(newCorsRule.maxAge)
+          })
+          showCorsCreateModal.value = false
+          newCorsRule.origins = ''
+          newCorsRule.methods = ''
+          newCorsRule.headers = ''
+          newCorsRule.exposeHeaders = ''
+          newCorsRule.maxAge = 100
+        }
+
+        const openCorsDeleteModal = (rule) => {
+          deletingCorsRule.value = rule
+          showCorsDeleteModal.value = true
+        }
+
+        const confirmDeleteCorsRule = () => {
+          if (deletingCorsRule.value) {
+            corsRulesList.value = corsRulesList.value.filter(r => r !== deletingCorsRule.value)
+          }
+          showCorsDeleteModal.value = false
+        }
 
         // Bucket metadata map
         const bucketMeta = {
@@ -1922,6 +2788,30 @@
           searchKeyword,
           activeFilter,
           filteredRules,
+          lifecycleRulesList,
+          lifecycleSearchType,
+          lifecycleSearchKeyword,
+          lifecycleActiveFilter,
+          filteredLifecycleRules,
+          showLifecycleCreateModal,
+          showLifecycleActionModal,
+          lifecycleActionType,
+          currentLifecycleRule,
+          newLifecycleRule,
+          createLifecycleRule,
+          openLifecycleActionModal,
+          lifecycleActionTitle,
+          lifecycleActionWarning,
+          lifecycleActionConfirm,
+          handleConfirmLifecycleAction,
+          corsRulesList,
+          showCorsCreateModal,
+          showCorsDeleteModal,
+          deletingCorsRule,
+          newCorsRule,
+          createCorsRule,
+          openCorsDeleteModal,
+          confirmDeleteCorsRule,
           sourceBucketInfo,
           targetRegion,
           clusterOptions,

@@ -29,6 +29,12 @@
       <!-- 基本信息 -->
       <BasicInfo v-else-if="currentSubTab === 'info'" />
 
+      <!-- 生命周期管理 -->
+      <LifecycleManagement v-else-if="currentSubTab === 'lifecycle'" :bucket-name="bucketName" />
+
+      <!-- CORS管理 -->
+      <CorsManagement v-else-if="currentSubTab === 'cors'" :bucket-name="bucketName" />
+
       <!-- Other Tabs Placeholder -->
       <div v-else class="placeholder-tab">
         <div class="placeholder-icon">📂</div>
@@ -43,6 +49,8 @@ import { ref, watch } from 'vue'
 import CrossRegionReplication from './CrossRegionReplication.vue'
 import AuthManagement from './AuthManagement.vue'
 import BasicInfo from './BasicInfo.vue'
+import LifecycleManagement from './LifecycleManagement.vue'
+import CorsManagement from './CorsManagement.vue'
 
 const props = defineProps({
   bucketName: {
@@ -68,7 +76,6 @@ const subTabs = [
   { id: 'auth', name: '授权管理' },
   { id: 'lifecycle', name: '生命周期管理' },
   { id: 'ccr', name: '跨域复制管理' },
-  { id: 'migration', name: '迁移管理' },
   { id: 'cors', name: 'CORS管理' }
 ]
 
