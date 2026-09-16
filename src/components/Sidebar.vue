@@ -136,10 +136,10 @@ watch(() => props.modelValue, (newVal) => {
 
 const expandedGroups = reactive({
   storage: true,
+  compute: true,
   mq: false,
   cache: false,
   analytics: false,
-  compute: false,
   trash: false,
   network: false,
   container1: false,
@@ -155,7 +155,14 @@ const xuanwuMenuGroups = [
   { id: 'mq', name: '消息队列服务', icon: 'mq' },
   { id: 'cache', name: '缓存服务', icon: 'cache' },
   { id: 'analytics', name: '数据计算与分析服务', icon: 'analytics' },
-  { id: 'compute', name: '计算服务', icon: 'compute' },
+  { 
+    id: 'compute', 
+    name: '计算服务', 
+    icon: 'compute',
+    children: [
+      { id: 'vm', name: '云虚拟机' }
+    ]
+  },
   { 
     id: 'storage', 
     name: '存储服务', 
@@ -173,7 +180,14 @@ const xuanwuMenuGroups = [
 const tianjiMenuGroups = [
   { id: 'container1', name: '容器服务', icon: 'container' },
   { id: 'network_test', name: '网络测试 (network)', icon: 'network' },
-  { id: 'compute', name: '计算服务', icon: 'compute' },
+  { 
+    id: 'compute', 
+    name: '计算服务', 
+    icon: 'compute',
+    children: [
+      { id: 'vm', name: '云虚拟机' }
+    ]
+  },
   { 
     id: 'storage', 
     name: '存储服务', 
@@ -199,7 +213,6 @@ const activeMenuGroups = computed(() => {
 })
 
 const isGroupActive = (group) => {
-  if (group.id === 'storage') return true
   if (group.children && group.children.some(c => c.id === activeSubItem.value)) {
     return true
   }

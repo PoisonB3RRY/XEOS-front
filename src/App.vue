@@ -28,9 +28,24 @@
 
         <!-- Scrollable Page Container -->
         <main class="page-content">
+          <!-- 玄武云虚拟机列表页 (复刻截图2) -->
+          <VmList 
+            v-if="currentView === 'vm-list'"
+            @select-vm="handleSelectVm"
+            @open-snapshot="(item) => handleSelectVm({ item, tab: 'snapshot' })"
+          />
+
+          <!-- 玄武云虚拟机详情页 (复刻截图1与3，含基本信息、硬盘管理[新增回收站按钮]、快照管理) -->
+          <VmDetail 
+            v-else-if="currentView === 'vm-detail'"
+            :instance-data="selectedVm"
+            :default-tab="vmDetailDefaultTab"
+            @back="handleGoBack"
+          />
+
           <!-- 玄武云 / 对象存储桶 列表页 -->
           <BucketList 
-            v-if="currentView === 'bucket-list'"
+            v-else-if="currentView === 'bucket-list'"
             @select-bucket="handleSelectBucket"
             @open-auth="handleOpenAuth"
           />
@@ -64,15 +79,35 @@ import Sidebar from './components/Sidebar.vue'
 import TabBar from './components/TabBar.vue'
 import BucketList from './components/BucketList.vue'
 import BucketDetail from './components/BucketDetail.vue'
+import VmList from './components/VmList.vue'
+import VmDetail from './components/VmDetail.vue'
 
 // Top Product selection: 'xuanwu' (default) | 'tianji'
 const currentProduct = ref('xuanwu')
 
-// Sidebar Menu selection
-const currentMenu = ref('obs-bucket')
+// Sidebar Menu selection: default to 'vm' matching user screenshots
+const currentMenu = ref('vm')
 
-// Main View: 'bucket-list' | 'bucket-detail' | 'other'
-const currentView = ref('bucket-list')
+// Main View: 'vm-list' | 'vm-detail' | 'bucket-list' | 'bucket-detail' | 'other'
+const currentView = ref('vm-list')
+
+// Selected VM instance data
+const selectedVm = ref({
+  name: 'testlu01',
+  id: '241c6956-2c3e-4461-b55d-afc6e4eafeb2',
+  org: '金融云门户系统',
+  owner: '12064927',
+  region: '上海',
+  zone: '上海裸金属一区（赵巷）',
+  os: 'Kylin Linux Advanced Server V10 (64-bit)',
+  arch: 'C86',
+  cpuCores: '4',
+  memory: '8GB',
+  createTime: '2026-09-14 17:28:09',
+  expireTime: '2026-12-13',
+  ip: '190.23.55.19'
+})
+const vmDetailDefaultTab = ref('info')
 
 // Selected bucket name for detail view
 const selectedBucketName = ref('test-1')
@@ -81,16 +116,16 @@ const detailDefaultTab = ref('ccr')
 // Dynamic Tabs for TabBar
 const tabs = ref([
   { id: 'home', name: '首页', closable: false },
-  { id: 'obs-bucket', name: '对象存储桶', closable: true }
+  { id: 'vm', name: '云虚拟机', closable: true }
 ])
-const activeTabId = ref('obs-bucket')
+const activeTabId = ref('vm')
 
 const handleProductChange = (productId) => {
   if (productId === 'xuanwu') {
-    currentMenu.value = 'obs-bucket'
-    currentView.value = 'bucket-list'
-    activeTabId.value = 'obs-bucket'
-    ensureTab({ id: 'obs-bucket', name: '对象存储桶', closable: true })
+    currentMenu.value = 'vm'
+    currentView.value = 'vm-list'
+    activeTabId.value = 'vm'
+    ensureTab({ id: 'vm', name: '云虚拟机', closable: true })
   } else if (productId === 'tianji') {
     currentMenu.value = 'tianji-obs-bucket'
     currentView.value = 'bucket-detail'
@@ -100,7 +135,11 @@ const handleProductChange = (productId) => {
 }
 
 const handleMenuSelect = (menuId) => {
-  if (menuId === 'obs-bucket') {
+  if (menuId === 'vm') {
+    currentView.value = 'vm-list'
+    activeTabId.value = 'vm'
+    ensureTab({ id: 'vm', name: '云虚拟机', closable: true })
+  } else if (menuId === 'obs-bucket') {
     currentView.value = 'bucket-list'
     activeTabId.value = 'obs-bucket'
     ensureTab({ id: 'obs-bucket', name: '对象存储桶', closable: true })
@@ -113,6 +152,15 @@ const handleMenuSelect = (menuId) => {
     activeTabId.value = menuId
     ensureTab({ id: menuId, name: getMenuTitle(menuId), closable: true })
   }
+}
+
+const handleSelectVm = ({ item, tab }) => {
+  selectedVm.value = { ...item }
+  vmDetailDefaultTab.value = tab || 'info'
+  currentView.value = 'vm-detail'
+  const detailTabId = `vm-${item.name}`
+  ensureTab({ id: detailTabId, name: item.name, closable: true })
+  activeTabId.value = detailTabId
 }
 
 const handleSelectBucket = (bucketName) => {
@@ -134,24 +182,38 @@ const handleOpenAuth = (bucketName) => {
 }
 
 const handleGoBack = () => {
-  currentView.value = 'bucket-list'
-  activeTabId.value = 'obs-bucket'
+  if (currentView.value === 'vm-detail') {
+    currentView.value = 'vm-list'
+    activeTabId.value = 'vm'
+  } else {
+    currentView.value = 'bucket-list'
+    activeTabId.value = 'obs-bucket'
+  }
 }
 
 const handleTabClick = (tabId) => {
-  if (tabId === 'home') {
-    currentView.value = 'bucket-list'
+  if (tabId === 'home' || tabId === 'vm') {
+    currentView.value = 'vm-list'
+    currentMenu.value = 'vm'
+    activeTabId.value = 'vm'
+  } else if (tabId.startsWith('vm-')) {
+    currentView.value = 'vm-detail'
+    activeTabId.value = tabId
   } else if (tabId === 'obs-bucket') {
     currentView.value = 'bucket-list'
     currentMenu.value = 'obs-bucket'
+    activeTabId.value = 'obs-bucket'
   } else if (tabId.startsWith('bucket-')) {
     currentView.value = 'bucket-detail'
+    activeTabId.value = tabId
   } else if (tabId === 'tianji-obs-bucket') {
     currentView.value = 'bucket-detail'
     currentMenu.value = 'tianji-obs-bucket'
+    activeTabId.value = 'tianji-obs-bucket'
   } else {
     currentView.value = 'other'
     currentMenu.value = tabId
+    activeTabId.value = tabId
   }
 }
 
@@ -174,6 +236,7 @@ const ensureTab = (tab) => {
 }
 
 const menuTitles = {
+  'vm': '云虚拟机',
   'obs-bucket': '对象存储桶',
   'obs-user': '对象存储用户',
   'tianji-obs-bucket': '信创对象存储-桶(OBS)',
