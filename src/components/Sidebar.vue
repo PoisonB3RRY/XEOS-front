@@ -179,7 +179,6 @@ const xuanwuMenuGroups = [
 // Menu for Tianji Cloud (天玑云产品)
 const tianjiMenuGroups = [
   { id: 'container1', name: '容器服务', icon: 'container' },
-  { id: 'network_test', name: '网络测试 (network)', icon: 'network' },
   { 
     id: 'compute', 
     name: '计算服务', 
@@ -202,10 +201,11 @@ const tianjiMenuGroups = [
   },
   { id: 'network', name: '网络服务', icon: 'network' },
   { id: 'database', name: '数据库服务', icon: 'database' },
-  { id: 'middleware', name: '中间件服务', icon: 'middleware' },
+  { id: 'cache', name: '缓存服务', icon: 'cache' },
+  { id: 'mq', name: '消息队列服务', icon: 'mq' },
   { id: 'analytics', name: '数据计算与分析服务', icon: 'analytics' },
-  { id: 'bigdata', name: '大数据服务', icon: 'bigdata' },
-  { id: 'security', name: '安全服务', icon: 'security' }
+  { id: 'security', name: '安全服务', icon: 'security' },
+  { id: 'trash', name: '回收站', icon: 'trash' }
 ]
 
 const activeMenuGroups = computed(() => {

@@ -79,7 +79,12 @@
       </div>
 
       <div class="user-profile">
-        <div class="user-badge">USER</div>
+        <span class="user-cloud-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
+          </svg>
+        </span>
+        <span class="user-id">12014844</span>
         <span class="user-arrow">▾</span>
       </div>
     </div>
@@ -105,13 +110,13 @@ watch(() => props.modelValue, (val) => {
 })
 
 const navList = [
-  { id: 'apaas', name: 'aPaaS' },
   { id: 'xuanwu', name: '玄武云产品' },
   { id: 'tianji', name: '天玑云产品' },
   { id: 'mscloud', name: '微软云产品' },
   { id: 'solution', name: '解决方案' },
   { id: 'resource', name: '资源管理' },
-  { id: 'system', name: '系统管理' }
+  { id: 'system', name: '系统管理' },
+  { id: 'apaas', name: 'aPaaS' }
 ]
 
 const selectNav = (id) => {
@@ -303,19 +308,35 @@ const selectNav = (id) => {
 .user-profile {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   cursor: pointer;
   margin-left: 8px;
-  padding: 3px 8px;
-  border-radius: 12px;
+  padding: 3px 10px;
+  border-radius: 14px;
   border: 1px solid #d9d9d9;
   background: #fbfbfb;
+  transition: all 0.2s;
 }
 
-.user-badge {
-  font-size: 12px;
-  font-weight: 600;
+.user-profile:hover {
+  border-color: #2468f2;
+}
+
+.user-cloud-icon {
+  display: flex;
+  align-items: center;
   color: #2468f2;
+}
+
+.user-cloud-icon svg {
+  width: 15px;
+  height: 15px;
+}
+
+.user-id {
+  font-size: 12px;
+  font-weight: 500;
+  color: #333333;
 }
 
 .user-arrow {

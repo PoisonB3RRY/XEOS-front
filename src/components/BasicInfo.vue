@@ -26,6 +26,10 @@
         <span class="info-value status-open">已开启</span>
       </div>
       <div class="info-item">
+        <span class="info-label">部署环境：</span>
+        <span class="info-value">SIT</span>
+      </div>
+      <div class="info-item">
         <span class="info-label">创建时间：</span>
         <span class="info-value">2026-06-18 13:50:40</span>
       </div>

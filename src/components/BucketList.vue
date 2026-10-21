@@ -19,6 +19,7 @@
             <option value="name">实例名称</option>
             <option value="org">资源组织</option>
             <option value="cluster">所属集群</option>
+            <option value="env">部署环境</option>
           </select>
           <input 
             type="text" 
@@ -63,6 +64,7 @@
             <th class="col-region">区域</th>
             <th class="col-cluster">所属集群</th>
             <th class="col-capacity">容量配额(GB)</th>
+            <th class="col-env">部署环境</th>
             <th class="col-time">创建时间</th>
             <th class="col-op">操作</th>
           </tr>
@@ -81,6 +83,7 @@
             <td class="col-region">{{ item.region }}</td>
             <td class="col-cluster">{{ item.cluster }}</td>
             <td class="col-capacity">{{ item.capacity }}</td>
+            <td class="col-env">{{ item.env || 'SIT' }}</td>
             <td class="col-time">{{ item.createTime }}</td>
             <td class="col-op">
               <div class="op-links">
@@ -93,7 +96,7 @@
 
           <!-- Empty State -->
           <tr v-if="filteredBuckets.length === 0">
-            <td colspan="8" class="empty-cell">
+            <td colspan="9" class="empty-cell">
               <div class="empty-wrap">
                 <div class="empty-text">暂无符合条件的桶数据</div>
               </div>
@@ -151,6 +154,7 @@ const initialBuckets = [
     region: 'SH',
     cluster: 'cluster-stdcsp',
     capacity: 10,
+    env: 'SIT',
     createTime: '2026-05-18 13:50:40'
   },
   {
@@ -160,6 +164,7 @@ const initialBuckets = [
     region: '合肥',
     cluster: 'cluster-stdcsp',
     capacity: 1027,
+    env: 'SIT',
     createTime: '2026-05-26 16:47:18'
   },
   {
@@ -169,6 +174,7 @@ const initialBuckets = [
     region: '合肥',
     cluster: 'cluster-stdcsp',
     capacity: 2,
+    env: 'SIT',
     createTime: '2026-06-09 15:20:44'
   },
   {
@@ -178,6 +184,7 @@ const initialBuckets = [
     region: '合肥',
     cluster: 'cluster-stdcsp',
     capacity: 1,
+    env: 'SIT',
     createTime: '2026-07-31 15:11:26'
   },
   {
@@ -187,6 +194,7 @@ const initialBuckets = [
     region: '合肥',
     cluster: 'cluster-stdcsp',
     capacity: 2,
+    env: 'SIT',
     createTime: '2026-08-13 17:13:29'
   },
   {
@@ -196,6 +204,7 @@ const initialBuckets = [
     region: '合肥',
     cluster: 'cluster-stdcsp',
     capacity: 5,
+    env: 'SIT',
     createTime: '2026-06-03 16:26:18'
   }
 ]
@@ -217,8 +226,11 @@ const filteredBuckets = computed(() => {
   if (!activeFilterKeyword.value) return bucketList.value
   const kw = activeFilterKeyword.value.toLowerCase().trim()
   return bucketList.value.filter(item => {
-    const val = String(item[searchField.value] || '').toLowerCase()
-    return val.includes(kw)
+    let val = item[searchField.value]
+    if (searchField.value === 'env') {
+      val = val || 'SIT'
+    }
+    return String(val || '').toLowerCase().includes(kw)
   })
 })
 
@@ -476,6 +488,7 @@ const handleCreateBucket = (newBucket) => {
 }
 
 .col-name { font-weight: 400; }
+.col-env { min-width: 80px; }
 .bucket-link {
   color: #2468f2;
   cursor: pointer;

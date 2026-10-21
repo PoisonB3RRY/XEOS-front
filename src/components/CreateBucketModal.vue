@@ -78,6 +78,31 @@
           </div>
 
           <div class="form-item">
+            <label class="form-label"><span class="required">*</span> 部署环境</label>
+            <div class="form-content">
+              <select v-model="formData.env" class="form-select">
+                <option value="" disabled>请选择部署环境</option>
+                <optgroup label="常态环境">
+                  <option value="DEV">DEV</option>
+                  <option value="SIT">SIT</option>
+                  <option value="UAT">UAT</option>
+                  <option value="REL">REL</option>
+                  <option value="自动化测试">自动化测试</option>
+                  <option value="自动化部署">自动化部署</option>
+                  <option value="投产验证">投产验证</option>
+                </optgroup>
+                <optgroup label="性能测试环境">
+                  <option value="混沌">混沌</option>
+                  <option value="性能全链路">性能全链路</option>
+                  <option value="性能比对">性能比对</option>
+                  <option value="性能回归">性能回归</option>
+                  <option value="性能专项">性能专项</option>
+                </optgroup>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-item">
             <label class="form-label"><span class="required">*</span> 多版本</label>
             <div class="form-content switch-row">
               <label class="switch">
@@ -121,6 +146,10 @@
           <div class="confirm-item">
             <span class="confirm-label">容量配额：</span>
             <span class="confirm-val">{{ formData.capacity }} GB</span>
+          </div>
+          <div class="confirm-item">
+            <span class="confirm-label">部署环境：</span>
+            <span class="confirm-val highlight">{{ formData.env }}</span>
           </div>
           <div class="confirm-item">
             <span class="confirm-label">多版本状态：</span>
@@ -169,6 +198,7 @@ const formData = reactive({
   suffix: 'zhangzj8',
   capacity: 100,
   versioning: true,
+  env: 'SIT',
   adminUser: 'dsfgdsdg-kf-0324'
 })
 
@@ -200,6 +230,7 @@ const handleCreate = () => {
     region: formData.region === '上海' ? 'SH' : formData.region,
     cluster: formData.cluster,
     capacity: formData.capacity,
+    env: formData.env || 'SIT',
     createTime: dateStr
   }
 
@@ -512,8 +543,8 @@ input:checked + .slider:before {
 .modal-footer {
   padding: 16px 36px 24px;
   display: flex;
-  justify-content: flex-end;
-  gap: 12px;
+  justify-content: center;
+  gap: 16px;
 }
 
 .btn {
