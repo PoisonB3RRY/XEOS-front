@@ -1108,6 +1108,15 @@
       line-height: 1.5;
       margin-top: 2px;
     }
+    .input-error {
+      border-color: #ff4d4f !important;
+    }
+    .error-validation-text {
+      font-size: 12px;
+      color: #ff4d4f;
+      line-height: 1.4;
+      margin-top: 2px;
+    }
     .modal-footer {
       padding: 12px 24px 20px;
       display: flex;
@@ -2099,8 +2108,15 @@
                       v-model.number="newLifecycleRule.currentFragmentExpireDays" 
                       :disabled="!newLifecycleRule.enableCurrentFragmentExpire"
                       placeholder="30" 
-                      :class="['form-input', 'input-number', { 'input-disabled': !newLifecycleRule.enableCurrentFragmentExpire }]"
-                      min="1"
+                      :class="[
+                        'form-input', 
+                        'input-number', 
+                        { 
+                          'input-disabled': !newLifecycleRule.enableCurrentFragmentExpire,
+                          'input-error': newLifecycleRule.enableCurrentFragmentExpire && (!newLifecycleRule.currentFragmentExpireDays || newLifecycleRule.currentFragmentExpireDays < 7)
+                        }
+                      ]"
+                      min="7"
                     />
                     <span class="label-info-icon inline-icon" title="指定未完成的分段上传碎片在多少天后自动清理">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -2110,6 +2126,12 @@
                       </svg>
                     </span>
                   </div>
+                </div>
+                <div v-if="newLifecycleRule.enableCurrentFragmentExpire && (!newLifecycleRule.currentFragmentExpireDays || newLifecycleRule.currentFragmentExpireDays < 7)" class="error-validation-text">
+                  碎片过期删除天数不得少于7天
+                </div>
+                <div class="danger-tip-text">
+                  碎片过期删除时间的设定需要大于文件上传所需时间，否则文件会上传失败，请根据业务场景设定碎片过期删除天数
                 </div>
               </div>
             </div>
@@ -2164,7 +2186,7 @@
         <div class="modal-footer">
           <button 
             class="btn btn-primary" 
-            :disabled="!newLifecycleRule.ruleName || (newLifecycleRule.scope === '前缀' && !newLifecycleRule.prefix) || (!newLifecycleRule.enableCurrentExpire && !newLifecycleRule.enableCurrentFragmentExpire && !newLifecycleRule.enableHistoryExpire)" 
+            :disabled="!newLifecycleRule.ruleName || (newLifecycleRule.scope === '前缀' && !newLifecycleRule.prefix) || (!newLifecycleRule.enableCurrentExpire && !newLifecycleRule.enableCurrentFragmentExpire && !newLifecycleRule.enableHistoryExpire) || (newLifecycleRule.enableCurrentFragmentExpire && (!newLifecycleRule.currentFragmentExpireDays || newLifecycleRule.currentFragmentExpireDays < 7))" 
             @click="createLifecycleRule"
           >
             确定

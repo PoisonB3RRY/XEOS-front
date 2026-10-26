@@ -153,8 +153,15 @@
                     v-model.number="formData.currentFragmentExpireDays" 
                     :disabled="!formData.enableCurrentFragmentExpire"
                     placeholder="30" 
-                    :class="['form-input', 'input-number', { 'input-disabled': !formData.enableCurrentFragmentExpire }]"
-                    min="1"
+                    :class="[
+                      'form-input', 
+                      'input-number', 
+                      { 
+                        'input-disabled': !formData.enableCurrentFragmentExpire,
+                        'input-error': isFragmentExpireInvalid
+                      }
+                    ]"
+                    min="7"
                   />
                   <span class="label-info-icon inline-icon" title="指定未完成的分段上传碎片在多少天后自动清理">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -164,6 +171,12 @@
                     </svg>
                   </span>
                 </div>
+              </div>
+              <div v-if="isFragmentExpireInvalid" class="error-validation-text">
+                碎片过期删除天数不得少于7天
+              </div>
+              <div class="danger-tip-text">
+                碎片过期删除时间的设定需要大于文件上传所需时间，否则文件会上传失败，请根据业务场景设定碎片过期删除天数
               </div>
             </div>
           </div>
@@ -276,6 +289,11 @@ watch(() => props.visible, (val) => {
   }
 })
 
+const isFragmentExpireInvalid = computed(() => {
+  if (!formData.enableCurrentFragmentExpire) return false
+  return !formData.currentFragmentExpireDays || formData.currentFragmentExpireDays < 7
+})
+
 const isFormValid = computed(() => {
   if (!formData.ruleName.trim()) return false
   if (formData.scope === '前缀' && !formData.prefix.trim()) return false
@@ -285,7 +303,7 @@ const isFormValid = computed(() => {
   if (!hasAnyPolicy) return false
 
   if (formData.enableCurrentExpire && (!formData.currentExpireDays || formData.currentExpireDays <= 0)) return false
-  if (formData.enableCurrentFragmentExpire && (!formData.currentFragmentExpireDays || formData.currentFragmentExpireDays <= 0)) return false
+  if (formData.enableCurrentFragmentExpire && (!formData.currentFragmentExpireDays || formData.currentFragmentExpireDays < 7)) return false
   if (formData.enableHistoryExpire && (!formData.historyExpireDays || formData.historyExpireDays <= 0)) return false
 
   return true
@@ -593,6 +611,22 @@ const handleSubmit = () => {
   font-size: 12px;
   color: #e65252;
   line-height: 1.5;
+  margin-top: 2px;
+}
+
+.input-error {
+  border-color: #ff4d4f !important;
+}
+
+.input-error:focus:not(.input-disabled) {
+  border-color: #ff4d4f !important;
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.15) !important;
+}
+
+.error-validation-text {
+  font-size: 12px;
+  color: #ff4d4f;
+  line-height: 1.4;
   margin-top: 2px;
 }
 
