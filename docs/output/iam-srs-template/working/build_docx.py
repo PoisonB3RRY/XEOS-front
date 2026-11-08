@@ -170,14 +170,19 @@ def add_table(doc, header, rows, widths, header_fill="D9D9D9", font_size=10.5, a
     trPr = hdr._tr.get_or_add_trPr()
     th = OxmlElement("w:tblHeader")
     trPr.append(th)
+    trPr.append(OxmlElement("w:cantSplit"))
     for i, h in enumerate(header):
         c = hdr.cells[i]
         c.width = widths[i]
         cell_text(c, h, bold=True, size=font_size, align="center")
         shade(c, header_fill)
+        for _p in c.paragraphs:          # 表头不得与首行数据分页
+            _p.paragraph_format.keep_with_next = True
 
     for row in rows:
-        cells = t.add_row().cells
+        _r = t.add_row()
+        _r._tr.get_or_add_trPr().append(OxmlElement("w:cantSplit"))
+        cells = _r.cells
         for i, v in enumerate(row):
             cells[i].width = widths[i]
             cell_text(cells[i], str(v), size=font_size, align=aligns[i])
