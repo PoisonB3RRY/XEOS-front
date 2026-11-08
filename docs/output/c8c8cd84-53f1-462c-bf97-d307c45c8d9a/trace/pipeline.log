@@ -1,0 +1,1 @@
+{"request_id": "c8c8cd84-53f1-462c-bf97-d307c45c8d9a", "stage": 3, "agent": "doc-converter", "operations": "html_to_doc_insert", "skill_used": "html-to-doc", "success": true, "present_files_opened": true, "fallback": false, "fallback_reason": null, "chunks": null, "warnings": [], "verify": {"content_total": 552, "pageref_count": 60, "heading_style_bound": "60/60"}}

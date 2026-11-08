@@ -5,6 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:tenant": "vite --port 3000",
+    "dev:ops": "vite --config vite.config.ops.js",
+    "dev:all": "node scripts/start-all.js",
+    "start": "node scripts/start-all.js",
     "build": "vite build",
     "preview": "vite preview"
   },

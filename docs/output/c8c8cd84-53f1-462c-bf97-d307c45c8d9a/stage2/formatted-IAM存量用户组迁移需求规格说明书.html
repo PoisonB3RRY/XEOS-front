@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="docx-page-size" content="A4">
+<title>华为云 IAM 身份中心存量用户组迁移 需求规格说明书</title>
+<style>
+@page { @bottom-center { content: counter(page); } }
+@page cover { @bottom-center { content: none; } }
+section[role="cover"] { page: cover; }
+
+:root {
+  /* 字号 */
+  --fs-h1: 16pt; --fs-h2: 13.5pt; --fs-h3: 12pt; --fs-body: 12pt;
+  --fs-table: 9pt; --fs-quote: 11pt; --fs-summary: 11.5pt;
+  --fs-cover-cat: 12pt; --fs-cover-title: 25pt; --fs-cover-sub: 14pt; --fs-cover-meta: 10.5pt;
+  --fs-toc-title: 16pt; --fs-toc-item: 11pt;
+  /* 字体 */
+  --ff-heading: "SimHei", "黑体", sans-serif;
+  --ff-body: "SimSun", "宋体", serif;
+  /* 颜色 */
+  --color-primary: #1565C0; --color-secondary: #0288D1;
+  --color-heading: #1A237E; --color-text: #212121; --color-muted: #616161;
+  --color-divider: #D6DCE5; --color-bg: #FFFFFF; --color-surface: #F2F5F9;
+  --color-white: #FFFFFF;
+  /* 间距 */
+  --sp-paragraph: 0 0 0.55em 0;
+  --sp-cover-top: 3.2cm; --sp-cover-cat: 0 0 18pt 0; --sp-cover-title: 0 0 10pt 0;
+  --sp-cover-sub: 0 0 40pt 0; --sp-cover-line: 0 0 7pt 0; --sp-cover-foot: 52pt 0 0 0;
+  --sp-toc-title: 0 0 16pt 0; --sp-toc-item: 0 0 4pt 0; --sp-toc-lv1: 8pt 0 4pt 0;
+  --sp-toc-indent: 1.6em;
+  --sp-h1: 20pt 0 12pt 0; --sp-h1-pad: 5pt 9pt;
+  --sp-h2: 16pt 0 8pt 0; --sp-h3: 12pt 0 6pt 0;
+  --sp-quote: 10pt 0 0.55em 0; --sp-quote-pad: 7pt 9pt;
+  --sp-summary: 12pt 0 14pt 0; --sp-summary-pad: 9pt 11pt;
+  --sp-list: 0 0 8pt 0; --sp-list-indent: 2.4em; --sp-li: 0 0 3pt 0;
+  --sp-table: 8pt 0 12pt 0; --sp-cell: 4pt 5pt;
+  /* 版式 */
+  --lh-body: 1.65; --lh-tight: 1.45; --lh-toc: 1.55;
+  --page-content-width: 16cm;
+  --fw-bold: 700; --fw-normal: 400;
+}
+
+* { box-sizing: border-box; }
+
+section[role="cover"] { padding: 0; }
+.cover-wrap { padding-top: var(--sp-cover-top); }
+
+.cover-category {
+  font-family: var(--ff-heading); font-size: var(--fs-cover-cat); font-weight: var(--fw-bold);
+  color: var(--color-primary); letter-spacing: 0.18em;
+  text-align: center; text-indent: 0; margin: var(--sp-cover-cat);
+}
+.cover-title {
+  font-family: var(--ff-heading); font-size: var(--fs-cover-title); font-weight: var(--fw-bold);
+  color: var(--color-heading); line-height: var(--lh-tight);
+  text-align: center; text-indent: 0; margin: var(--sp-cover-title);
+}
+.cover-subtitle {
+  font-family: var(--ff-heading); font-size: var(--fs-cover-sub); font-weight: var(--fw-normal);
+  color: var(--color-muted); text-align: center; text-indent: 0; margin: var(--sp-cover-sub);
+}
+.cover-meta {
+  font-family: var(--ff-body); font-size: var(--fs-cover-meta); color: var(--color-text);
+  text-align: center; text-indent: 0; margin: var(--sp-cover-line); line-height: var(--lh-body);
+}
+.cover-foot {
+  font-family: var(--ff-body); font-size: var(--fs-cover-meta); color: var(--color-muted);
+  text-align: center; text-indent: 0; margin: var(--sp-cover-foot);
+}
+
+.toc-title {
+  font-family: var(--ff-heading); font-size: var(--fs-toc-title); font-weight: var(--fw-bold);
+  color: var(--color-heading); text-align: center; text-indent: 0;
+  margin: var(--sp-toc-title); letter-spacing: 0.12em;
+}
+.toc-list, .toc-list ol, .toc-list ul { list-style: none; list-style-type: none; margin: 0; padding-left: 0; }
+.toc-list li {
+  font-family: var(--ff-body); font-size: var(--fs-toc-item); color: var(--color-text);
+  text-indent: 0; text-align: left; margin: var(--sp-toc-item); line-height: var(--lh-toc);
+}
+.toc-list > li.lv1 { font-family: var(--ff-heading); font-weight: var(--fw-bold); margin: var(--sp-toc-lv1); }
+.toc-list ol { padding-left: var(--sp-toc-indent); }
+.toc-list a { color: inherit; text-decoration: none; }
+
+h1.section-header {
+  font-family: var(--ff-heading); font-size: var(--fs-h1); font-weight: var(--fw-bold);
+  color: var(--color-white); background: var(--color-primary);
+  padding: var(--sp-h1-pad); margin: var(--sp-h1);
+  text-indent: 0; text-align: left; line-height: var(--lh-tight);
+}
+h2 {
+  font-family: var(--ff-heading); font-size: var(--fs-h2); font-weight: var(--fw-bold);
+  color: var(--color-heading); margin: var(--sp-h2);
+  text-indent: 0; text-align: left; line-height: var(--lh-tight);
+}
+h3 {
+  font-family: var(--ff-heading); font-size: var(--fs-h3); font-weight: var(--fw-bold);
+  color: var(--color-text); margin: var(--sp-h3);
+  text-indent: 0; text-align: left; line-height: var(--lh-tight);
+}
+p {
+  font-family: var(--ff-body); font-size: var(--fs-body); color: var(--color-text);
+  text-indent: 2em; text-align: justify; line-height: var(--lh-body); margin: var(--sp-paragraph);
+}
+p.executive-summary {
+  font-family: var(--ff-body); font-size: var(--fs-summary); color: var(--color-text);
+  text-indent: 0; text-align: justify; line-height: var(--lh-body);
+  background: var(--color-surface); border-left: 4px solid var(--color-primary);
+  padding: var(--sp-summary-pad); margin: var(--sp-summary);
+}
+p.quote {
+  font-family: var(--ff-body); font-size: var(--fs-quote); color: var(--color-text);
+  text-indent: 0; text-align: left; background: var(--color-surface);
+  border-left: 3px solid var(--color-primary);
+  padding: var(--sp-quote-pad); margin: var(--sp-quote);
+}
+ol, ul { margin: var(--sp-list); padding-left: var(--sp-list-indent); }
+li {
+  font-family: var(--ff-body); font-size: var(--fs-body); color: var(--color-text);
+  text-indent: 0; text-align: justify; line-height: var(--lh-body); margin: var(--sp-li);
+}
+strong { font-weight: var(--fw-bold); }
+
+table { width: 100%; border-collapse: collapse; margin: var(--sp-table); }
+thead { display: table-header-group; }
+th {
+  font-family: var(--ff-heading); font-size: var(--fs-table); font-weight: var(--fw-bold);
+  color: var(--color-heading); background: var(--color-surface);
+  border: 1px solid var(--color-divider); padding: var(--sp-cell);
+  text-indent: 0; text-align: left; line-height: var(--lh-tight);
+}
+td {
+  font-family: var(--ff-body); font-size: var(--fs-table); color: var(--color-text);
+  border: 1px solid var(--color-divider); padding: var(--sp-cell);
+  text-indent: 0; text-align: left; line-height: var(--lh-tight);
+}
+</style>
+</head>
+<body>
+
+<section role="cover">
+  <div class="cover-wrap">
+    <p class="cover-category">需 求 文 档</p>
+    <p class="cover-title">华为云 IAM 身份中心<br>存量用户组迁移<br>需求规格说明书</p>
+    <p class="cover-subtitle">用户退出旧组 / 用户加入新组</p>
+    <p class="cover-meta">文档编号　　SRS-IAM-IS-MIGRATION-001</p>
+    <p class="cover-meta">文档版本　　V1.0（初稿）</p>
+    <p class="cover-meta">编制日期　　2026 年 11 月 8 日</p>
+    <p class="cover-meta">编制依据　　《存量用户组迁移方案（IAM 身份中心）》</p>
+    <p class="cover-meta">　　　　　　《IAM 身份中心 API 参考》（版本 02）</p>
+    <p class="cover-meta">密　　级　　内部</p>
+    <p class="cover-foot">本文件为产品设计参考，具体实施请结合公司合规与法务要求确认</p>
+  </div>
+</section>
+
+<section role="cover">
+<nav class="doc-toc" aria-label="文档目录">
+<p class="toc-title">目　录</p>
+<ol class="toc-list">
+<li class="lv1"><a href="#section-1">一、文档信息</a><ol><li><a href="#section-2">1.1 文档基本信息</a></li><li><a href="#section-3">1.2 变更记录</a></li><li><a href="#section-4">1.3 评审记录</a></li></ol></li>
+<li class="lv1"><a href="#section-5">二、引言</a><ol><li><a href="#section-6">2.1 编写目的</a></li><li><a href="#section-7">2.2 项目背景</a></li><li><a href="#section-8">2.3 名词与缩略语</a></li><li><a href="#section-9">2.4 参考资料</a></li></ol></li>
+<li class="lv1"><a href="#section-10">三、总体描述</a><ol><li><a href="#section-11">3.1 产品定位与范围</a></li><li><a href="#section-12">3.2 用户角色与特征</a></li><li><a href="#section-13">3.3 运行环境</a></li><li><a href="#section-14">3.4 设计与实现约束</a></li><li><a href="#section-15">3.5 假设与依赖</a></li></ol></li>
+<li class="lv1"><a href="#section-16">四、需求概述</a><ol><li><a href="#section-17">4.1 功能清单</a></li><li><a href="#section-18">4.2 关键业务规则</a></li><li><a href="#section-19">4.3 用户故事</a></li></ol></li>
+<li class="lv1"><a href="#section-20">五、功能需求</a><ol><li><a href="#section-21">5.1 FR-01 迁移配置加载与校验</a></li><li><a href="#section-22">5.2 FR-02 查询用户已加入的用户组</a></li><li><a href="#section-23">5.3 FR-03 用户退出旧组（功能一）</a></li><li><a href="#section-24">5.4 FR-04 用户加入新组（功能二）</a></li><li><a href="#section-25">5.5 FR-05 批量迁移编排</a></li><li><a href="#section-26">5.6 FR-06 执行记录与结果汇总</a></li><li><a href="#section-27">5.7 FR-07 失败重试与断点续跑</a></li><li><a href="#section-28">5.8 FR-08 迁移预演（Dry Run）</a></li></ol></li>
+<li class="lv1"><a href="#section-29">六、外部接口需求</a><ol><li><a href="#section-30">6.1 接口总览</a></li><li><a href="#section-31">6.2 接口契约</a></li><li><a href="#section-32">6.3 认证与调用主体要求</a></li></ol></li>
+<li class="lv1"><a href="#section-33">七、数据需求</a><ol><li><a href="#section-34">7.1 迁移任务数据</a></li><li><a href="#section-35">7.2 单用户迁移记录数据</a></li><li><a href="#section-36">7.3 日志与审计数据</a></li><li><a href="#section-37">7.4 状态设计</a></li></ol></li>
+<li class="lv1"><a href="#section-38">八、异常处理需求</a><ol><li><a href="#section-39">8.1 异常分类与处理策略</a></li><li><a href="#section-40">8.2 边界条件</a></li></ol></li>
+<li class="lv1"><a href="#section-41">九、非功能需求</a><ol><li><a href="#section-42">9.1 性能需求</a></li><li><a href="#section-43">9.2 可靠性需求</a></li><li><a href="#section-44">9.3 安全需求</a></li><li><a href="#section-45">9.4 可维护性与可观测性需求</a></li><li><a href="#section-46">9.5 兼容性需求</a></li></ol></li>
+<li class="lv1"><a href="#section-47">十、业务流程设计</a><ol><li><a href="#section-48">10.1 批量迁移主流程</a></li><li><a href="#section-49">10.2 编排顺序说明</a></li><li><a href="#section-50">10.3 时序说明（单用户）</a></li></ol></li>
+<li class="lv1"><a href="#section-51">十一、验收标准</a></li>
+<li class="lv1"><a href="#section-52">十二、需求追踪矩阵（RTM）</a></li>
+<li class="lv1"><a href="#section-53">十三、风险与遗留问题</a><ol><li><a href="#section-54">13.1 风险登记册</a></li><li><a href="#section-55">13.2 待确认事项</a></li><li><a href="#section-56">13.3 回退方案</a></li></ol></li>
+<li class="lv1"><a href="#section-57">十四、附录</a><ol><li><a href="#section-58">14.1 接口调用顺序示意</a></li><li><a href="#section-59">14.2 最小权限清单（建议）</a></li><li><a href="#section-60">14.3 编制说明</a></li></ol></li>
+</ol>
+</nav>
+</section>
+<section role="body" class="report-body" data-page-restart="1">
+<p class="executive-summary">&nbsp;&nbsp;<strong>摘　要</strong>　本文档将已确认的业务方案《存量用户组迁移方案（IAM 身份中心）》转化为可开发、可测试、可验收的需求规格，覆盖迁移配置校验、用户退出旧组、用户加入新组、批量编排、执行记录与断点续跑六项功能，共涉及 4 个 IAM 身份中心接口（ListGroupMembershipsForMember、DeleteGroupMembership、ListGroups、CreateGroupMembership）。核心设计约束为：批量迁移必须按“先加入新组、再退出旧组”执行，以保证用户权限只增不减；解绑所需的成员关系标识只能来自查询结果；迁移流程止于写接口成功返回，本期不做校验与抽查。主要风险集中在“无事后校验导致误操作不可自动发现”与“目标组同名导致误绑”两项，已通过结构化留痕、预演模式与选组中止策略缓解；性能指标、并发上限、留存期等 8 项参数待业务与运维确认后固化。</p>
+<h1 class="section-header" id="section-1">一、文档信息</h1>
+<h2 id="section-2">1.1 文档基本信息</h2>
+<table>
+<thead><tr>
+<th>项目</th>
+<th>内容</th>
+</tr></thead>
+<tbody>
+<tr><td>文档名称</td><td>华为云 IAM 身份中心存量用户组迁移 需求规格说明书</td></tr>
+<tr><td>文档编号</td><td>SRS-IAM-IS-MIGRATION-001</td></tr>
+<tr><td>版本号</td><td>V1.0</td></tr>
+<tr><td>文档状态</td><td>初稿（待评审）</td></tr>
+<tr><td>编制日期</td><td>2026-11-08</td></tr>
+<tr><td>编制依据</td><td>《存量用户组迁移方案（IAM 身份中心）》（知识库：华为云）、《IAM 身份中心 API 参考》（文档版本 02，发布日期 2025-12-19）</td></tr>
+<tr><td>适用范围</td><td>存量用户用户组关系迁移能力的开发、测试与验收</td></tr>
+<tr><td>密级</td><td>内部</td></tr>
+</tbody></table>
+<h2 id="section-3">1.2 变更记录</h2>
+<table>
+<thead><tr>
+<th>版本</th>
+<th>日期</th>
+<th>变更内容</th>
+<th>变更人</th>
+<th>审批</th>
+</tr></thead>
+<tbody>
+<tr><td>V1.0</td><td>2026-11-08</td><td>首次编制，基于业务描述文档形成完整需求规格</td><td>产品</td><td>待评审</td></tr>
+</tbody></table>
+<h2 id="section-4">1.3 评审记录</h2>
+<table>
+<thead><tr>
+<th>轮次</th>
+<th>日期</th>
+<th>参与方</th>
+<th>结论</th>
+<th>遗留问题</th>
+</tr></thead>
+<tbody>
+<tr><td>—</td><td>—</td><td>产品 / 研发 / 测试 / 安全</td><td>待评审</td><td>见第十二章</td></tr>
+</tbody></table>
+<p>---</p>
+<h1 class="section-header" id="section-5">二、引言</h1>
+<h2 id="section-6">2.1 编写目的</h2>
+<p>本文档将业务侧已确认的《存量用户组迁移方案（IAM 身份中心）》转化为可开发、可测试、可验收的需求规格说明，明确该迁移能力的功能边界、接口契约、数据口径、非功能指标与验收标准，作为研发实现、测试用例设计与上线验收的共同依据。</p>
+<p>本文档的读者包括：产品负责人、后端研发、测试工程师、云平台运维、安全与合规评审人员。</p>
+<h2 id="section-7">2.2 项目背景</h2>
+<p>当前云上存在一批存量用户，其权限通过旧用户组继承获得，包含业务上已不再需要的权限（例如对象存储的 ListBucket 等列举类权限）。为落实权限最小化原则、收敛存量授权面，需要将这批存量用户从旧用户组迁移至目标新用户组。</p>
+<p>迁移在华为云 IAM 身份中心（Identity Center）层面完成，本质是调整&quot;用户—用户组&quot;成员关系（Membership）：解除用户与旧用户组的绑定，并建立用户与目标用户组的绑定。业务侧已完成接口可行性验证，确认仅需 4 个开放接口、拆分为 2 个相互独立的功能即可覆盖迁移诉求。</p>
+<h2 id="section-8">2.3 名词与缩略语</h2>
+<table>
+<thead><tr>
+<th>术语</th>
+<th>说明</th>
+</tr></thead>
+<tbody>
+<tr><td>IAM 身份中心</td><td>华为云统一身份管理服务，提供用户、用户组、成员关系的集中管理能力</td></tr>
+<tr><td>身份源（Identity Store）</td><td>身份中心的用户与用户组数据容器，由 identity_store_id 唯一标识</td></tr>
+<tr><td>用户组（Group）</td><td>权限的集合载体，用户加入用户组后即拥有该组的全部权限</td></tr>
+<tr><td>成员关系（Membership）</td><td>&quot;用户—用户组&quot;的绑定记录，由 membership_id 唯一标识</td></tr>
+<tr><td>旧用户组</td><td>存量用户当前所属的用户组，待解除绑定</td></tr>
+<tr><td>目标新用户组</td><td>存量用户迁移后应归属的用户组</td></tr>
+<tr><td>会话令牌</td><td>使用临时安全凭据调用接口时需在请求头携带的 X-Security-Token</td></tr>
+<tr><td>幂等</td><td>同一操作重复执行不产生额外副作用（重复解绑、重复绑定均视为成功）</td></tr>
+<tr><td>权限空档</td><td>用户已退出旧组但尚未加入新组的中间状态，此时用户权限为两者的差集</td></tr>
+</tbody></table>
+<h2 id="section-9">2.4 参考资料</h2>
+<table>
+<thead><tr>
+<th>编号</th>
+<th>名称</th>
+<th>来源</th>
+<th>用途</th>
+</tr></thead>
+<tbody>
+<tr><td>REF-01</td><td>《存量用户组迁移方案（IAM 身份中心）》</td><td>内部业务文档，2026-11-08</td><td>业务场景与接口选型依据</td></tr>
+<tr><td>REF-02</td><td>《IAM 身份中心 API 参考》文档版本 02</td><td>华为云，2025-12-19</td><td>接口参数、约束与错误码依据</td></tr>
+<tr><td>REF-03</td><td>华为云 IAM 用户组权限说明</td><td>华为云公开文档</td><td>用户组权限继承关系依据</td></tr>
+</tbody></table>
+<p>---</p>
+<h1 class="section-header" id="section-10">三、总体描述</h1>
+<h2 id="section-11">3.1 产品定位与范围</h2>
+<p>本需求交付一项<strong>存量用户组迁移能力</strong>（形态为运维侧迁移任务／脚本工具，非面向最终用户的 Web 界面），供运维人员按批次将存量用户从旧用户组迁移至目标新用户组。</p>
+<p><strong>本期包含：</strong></p>
+<ol><li>迁移配置的加载与校验；</li><li>功能一：用户退出旧组（查询用户所属用户组 → 解绑成员关系）；</li><li>功能二：用户加入新组（查询目标用户组 → 绑定成员关系）；</li><li>批量迁移的顺序编排、执行记录、结果汇总与断点续跑。</li></ol>
+<p><strong>本期不包含（明确范围外）：</strong></p>
+<table>
+<thead><tr>
+<th>编号</th>
+<th>范围外事项</th>
+<th>说明</th>
+</tr></thead>
+<tbody>
+<tr><td>OUT-01</td><td>成员关系校验与抽查</td><td>两个功能均以写接口成功返回为完成标志，不追加核对类调用</td></tr>
+<tr><td>OUT-02</td><td>目标新用户组的创建与权限策略配置</td><td>作为迁移前置条件，由权限管理流程预先完成</td></tr>
+<tr><td>OUT-03</td><td>用户身份源的创建与用户开户</td><td>存量用户已存在，本期不涉及</td></tr>
+<tr><td>OUT-04</td><td>图形化操作界面</td><td>如需可视化编排界面，另行立项评估</td></tr>
+<tr><td>OUT-05</td><td>迁移结果的自动回滚</td><td>本期仅提供失败重试与人工回退说明，不实现自动回滚</td></tr>
+</tbody></table>
+<p class="quote">&nbsp;&nbsp;说明：OUT-01 意味着迁移结果缺乏自动化校验手段，其带来的可观测性缺口已在第十二章风险项 RK-04 中登记，并以执行记录与人工抽检作为补偿措施。</p>
+<h2 id="section-12">3.2 用户角色与特征</h2>
+<table>
+<thead><tr>
+<th>角色</th>
+<th>职责</th>
+<th>特征与关注点</th>
+</tr></thead>
+<tbody>
+<tr><td>平台运维工程师（主用户）</td><td>执行迁移任务、处理失败项、输出结果报告</td><td>熟悉云 API 与命令行，关注执行可控性、可重试性与结果可追溯</td></tr>
+<tr><td>安全合规负责人</td><td>审批迁移方案、确认权限收敛结果</td><td>关注最小权限、操作留痕、审计可回溯</td></tr>
+<tr><td>业务/应用负责人</td><td>知会迁移窗口与影响范围</td><td>关注迁移期间业务连续性，避免权限空档导致业务中断</td></tr>
+</tbody></table>
+<h2 id="section-13">3.3 运行环境</h2>
+<table>
+<thead><tr>
+<th>项目</th>
+<th>要求</th>
+</tr></thead>
+<tbody>
+<tr><td>调用主体</td><td>组织管理账号，或已配置为服务委托管理员的成员账号（接口文档明确要求）</td></tr>
+<tr><td>认证方式</td><td>永久 AK/SK，或临时安全凭据（后者需额外在请求头携带 X-Security-Token 会话令牌）</td></tr>
+<tr><td>网络</td><td>运行环境需可访问 IAM 身份中心 OpenAPI 服务端点（具体 Region 与 Endpoint 待确认，见 TBD-02）</td></tr>
+<tr><td>运行时</td><td>支持 HTTPS 请求与 JSON 解析的脚本运行时（技术栈由研发确定）</td></tr>
+<tr><td>数据存放</td><td>迁移清单、执行记录与日志存放于运维侧受控目录，不入代码仓库</td></tr>
+</tbody></table>
+<h2 id="section-14">3.4 设计与实现约束</h2>
+<table>
+<thead><tr>
+<th>编号</th>
+<th>约束</th>
+<th>来源</th>
+</tr></thead>
+<tbody>
+<tr><td>CST-01</td><td>identity_store_id 以固定值保存在配置文件中，各接口路径参数直接引用，不逐次解析；接口文档标注该参数长度最小／最大均为 12 位</td><td>REF-01 / REF-02</td></tr>
+<tr><td>CST-02</td><td>分页参数 limit 有效范围 1–100，缺省 100；必须以响应中的 next_marker 持续翻页直至返回 null</td><td>REF-02</td></tr>
+<tr><td>CST-03</td><td>解绑所需的 membership_id 只能从&quot;列出用户加入的组&quot;的查询结果中获取，不得自行拼装</td><td>REF-01</td></tr>
+<tr><td>CST-04</td><td>绑定与解绑均以单个&quot;用户—用户组&quot;关系为操作粒度，不支持批量接口</td><td>REF-02</td></tr>
+<tr><td>CST-05</td><td>绑定用户与用户组必须属于同一身份源</td><td>REF-02</td></tr>
+<tr><td>CST-06</td><td>迁移流程止于写操作成功返回，不追加校验、抽查类接口（IsMemberInGroups、ListGroupMemberships、DescribeGroupMembership、DescribeGroups 等不进入本期范围）</td><td>REF-01</td></tr>
+<tr><td>CST-07</td><td>选组环节直接复用 ListGroups 响应返回的 group_id，无须调用查询用户组 ID 的辅助接口</td><td>REF-01</td></tr>
+</tbody></table>
+<h2 id="section-15">3.5 假设与依赖</h2>
+<table>
+<thead><tr>
+<th>编号</th>
+<th>类型</th>
+<th>内容</th>
+<th>影响</th>
+</tr></thead>
+<tbody>
+<tr><td>ASM-01</td><td>假设</td><td>存量用户清单可由业务侧提供，字段为 user_id，规模在千级以内</td><td>影响性能指标与批次切分策略，规模待 TBD-01 确认</td></tr>
+<tr><td>ASM-02</td><td>假设</td><td>目标新用户组的 display_name 在身份源内唯一</td><td>若不唯一，按 FR-04 中止并要求人工指定 group_id</td></tr>
+<tr><td>ASM-03</td><td>假设</td><td>旧用户组的 group_id 可提前获得并作为配置项或任务参数传入</td><td>本功能不通过 ListGroups 反查旧组</td></tr>
+<tr><td>ASM-04</td><td>假设</td><td>迁移在业务低峰窗口执行，可接受迁移期间极短的权限变更</td><td>影响编排顺序设计（先加后减）</td></tr>
+<tr><td>DEP-01</td><td>依赖</td><td>目标新用户组已创建且权限策略已配置完成</td><td>未就绪则迁移结果不符合预期</td></tr>
+<tr><td>DEP-02</td><td>依赖</td><td>调用账号具备 4 个接口的最小权限</td><td>缺失则任务无法启动</td></tr>
+<tr><td>DEP-03</td><td>依赖</td><td>IAM 身份中心服务可用，且接口限流阈值满足批量调用需求</td><td>影响并发度与耗时，限流阈值待 TBD-03 确认</td></tr>
+<tr><td>DEP-04</td><td>依赖</td><td>临时安全凭据在任务执行期内有效</td><td>凭据过期将导致批量失败</td></tr>
+</tbody></table>
+<p>---</p>
+<h1 class="section-header" id="section-16">四、需求概述</h1>
+<h2 id="section-17">4.1 功能清单</h2>
+<table>
+<thead><tr>
+<th>功能编号</th>
+<th>功能名称</th>
+<th>接口调用序列</th>
+<th>作用</th>
+</tr></thead>
+<tbody>
+<tr><td>F-01</td><td>迁移配置加载与校验</td><td>无（本地）</td><td>校验身份源、组标识、认证信息与用户清单可用性</td></tr>
+<tr><td>F-02</td><td>用户退出旧组</td><td>ListGroupMembershipsForMember → DeleteGroupMembership</td><td>定位&quot;用户—旧组&quot;关联关系并解绑</td></tr>
+<tr><td>F-03</td><td>用户加入新组</td><td>ListGroups → CreateGroupMembership</td><td>选定目标用户组并将用户绑定至该组</td></tr>
+<tr><td>F-04</td><td>批量迁移编排</td><td>组合 F-02、F-03</td><td>按&quot;先加入新组、再退出旧组&quot;顺序逐用户执行</td></tr>
+<tr><td>F-05</td><td>执行记录与结果汇总</td><td>无（本地）</td><td>逐用户留痕并输出汇总报告</td></tr>
+<tr><td>F-06</td><td>失败重试与断点续跑</td><td>组合 F-02、F-03</td><td>对可重试错误自动重试，支持中断后继续执行</td></tr>
+</tbody></table>
+<h2 id="section-18">4.2 关键业务规则</h2>
+<table>
+<thead><tr>
+<th>编号</th>
+<th>规则</th>
+<th>依据</th>
+</tr></thead>
+<tbody>
+<tr><td>BR-01</td><td>批量迁移必须按&quot;先加入新组、再退出旧组&quot;的顺序执行，以保证用户权限只增不减，避免迁移过程中的权限空档</td><td>REF-01 第四章</td></tr>
+<tr><td>BR-02</td><td>仅将用户加入新组不会自动剥离旧组权限；旧组权限在&quot;退出旧组&quot;成功后才失效</td><td>REF-01 第四章</td></tr>
+<tr><td>BR-03</td><td>用户若不在旧组中，跳过解绑步骤，判定为&quot;无需解绑&quot;，不计为失败</td><td>REF-01 第二章</td></tr>
+<tr><td>BR-04</td><td>两个功能相互独立，可分别执行、分别重试；任一功能单独失败不影响另一功能已产生的效果</td><td>REF-01 第四章</td></tr>
+<tr><td>BR-05</td><td>单个用户迁移失败不阻断后续用户执行（fail-soft），但全局性错误（配置错误、目标组不存在、认证失败）必须立即中止整个任务</td><td>本文档设计决策，见 7.4</td></tr>
+</tbody></table>
+<h2 id="section-19">4.3 用户故事</h2>
+<table>
+<thead><tr>
+<th>编号</th>
+<th>用户故事</th>
+<th>验收关联</th>
+</tr></thead>
+<tbody>
+<tr><td>US-01</td><td>作为平台运维工程师，我希望按用户清单批量完成组迁移，以便在不逐个手工操作的前提下收敛存量权限</td><td>AC-01、AC-07</td></tr>
+<tr><td>US-02</td><td>作为平台运维工程师，我希望迁移过程中用户权限不出现空档，以便业务不因权限变更中断</td><td>AC-03</td></tr>
+<tr><td>US-03</td><td>作为平台运维工程师，我希望对网络抖动等临时故障自动重试，并能从中断处继续执行，以便长任务不因单点失败而全量重跑</td><td>AC-08</td></tr>
+<tr><td>US-04</td><td>作为安全合规负责人，我希望每个用户的迁移动作都有结构化留痕，以便事后审计与权限核对</td><td>AC-09</td></tr>
+<tr><td>US-05</td><td>作为平台运维工程师，我希望在正式执行前预览将执行的变更清单，以便降低误操作风险</td><td>AC-10</td></tr>
+</tbody></table>
+<p>---</p>
+<h1 class="section-header" id="section-20">五、功能需求</h1>
+<h2 id="section-21">5.1 FR-01 迁移配置加载与校验</h2>
+<p><strong>优先级：</strong> 必须（Must）</p>
+<p><strong>需求描述：</strong> 任务启动时加载迁移配置并完成前置校验，任一项校验失败立即终止，且不得发起任何写接口调用。</p>
+<p><strong>配置项：</strong></p>
+<table>
+<thead><tr>
+<th>配置项</th>
+<th>必填</th>
+<th>说明</th>
+<th>校验规则</th>
+</tr></thead>
+<tbody>
+<tr><td>identity_store_id</td><td>是</td><td>身份源 ID</td><td>非空，长度等于 12 位</td></tr>
+<tr><td>endpoint / region</td><td>是</td><td>身份中心服务端点</td><td>非空，可解析</td></tr>
+<tr><td>认证凭据</td><td>是</td><td>AK/SK 或临时凭据</td><td>非空；使用临时凭据时 security_token 必填</td></tr>
+<tr><td>old_group_id</td><td>是</td><td>旧用户组 ID</td><td>非空</td></tr>
+<tr><td>target_group_display_name</td><td>是</td><td>目标新组显示名</td><td>非空</td></tr>
+<tr><td>用户清单</td><td>是</td><td>待迁移 user_id 列表</td><td>非空、无重复、格式合法</td></tr>
+<tr><td>concurrency</td><td>否</td><td>并发度</td><td>默认 1，取值范围 1–3（待 TBD-03 确认上限）</td></tr>
+<tr><td>dry_run</td><td>否</td><td>是否只预演不写入</td><td>默认 false</td></tr>
+</tbody></table>
+<p><strong>验收标准：</strong></p>
+<ul><li>Given 配置文件中 identity_store_id 缺失或长度不为 12 位，When 启动任务，Then 任务在配置校验阶段终止，输出明确错误提示，且不产生任何接口调用。</li><li>Given 用户清单为空或含重复 user_id，When 启动任务，Then 任务终止并提示具体行号或重复项。</li><li>Given 使用临时安全凭据但未提供会话令牌，When 启动任务，Then 任务终止并提示补充 X-Security-Token。</li><li>Given 全部配置校验通过，When 启动任务，Then 进入选组阶段（FR-04 步骤一），并记录任务开始时间与配置摘要（凭据信息脱敏）。</li></ul>
+<h2 id="section-22">5.2 FR-02 查询用户已加入的用户组</h2>
+<p><strong>优先级：</strong> 必须（Must）</p>
+<p><strong>需求描述：</strong> 调用 ListGroupMembershipsForMember 拉取指定用户加入的全部用户组，必要时分页取全，并在结果中定位旧用户组对应的成员关系。</p>
+<p><strong>处理规则：</strong></p>
+<ol><li>Query 参数传 user_id（必选）、limit（取值 100）、marker（首次为空）；</li><li>判断响应 page_info.next_marker，非 null 时以其继续请求，直至返回 null，保证结果取全；</li><li>在汇总后的 group_memberships 列表中，按 group_id 等于配置的 old_group_id 精确匹配，取出该记录的 membership_id；</li><li>匹配到唯一记录 → 进入解绑（FR-03）；</li><li>未匹配到任何记录 → 判定该用户不在旧组，状态置 SKIPPED_NOT_IN_OLD_GROUP，不调用解绑接口；</li><li>匹配到多条记录（异常情况）→ 取第一条执行，并记录告警日志，状态附注 WARN_MULTI_MATCH。</li></ol>
+<p><strong>验收标准：</strong></p>
+<ul><li>Given 用户加入的组超过 100 个，When 查询其所属用户组，Then 系统按 next_marker 翻页直至取全，最终匹配结果不受分页截断影响。</li><li>Given 用户所属组中包含旧用户组，When 完成匹配，Then 输出该用户对应的 membership_id。</li><li>Given 用户不属于旧用户组，When 完成匹配，Then 不调用解绑接口，该用户状态为&quot;跳过：不在旧组&quot;，且不计入失败数。</li><li>Given 查询接口返回可重试错误，When 达到重试次数上限仍失败，Then 该用户状态置为失败，记录 error_code、error_msg 与 request_id。</li></ul>
+<h2 id="section-23">5.3 FR-03 用户退出旧组（功能一）</h2>
+<p><strong>优先级：</strong> 必须（Must）</p>
+<p><strong>需求描述：</strong> 调用 DeleteGroupMembership，以 FR-02 取得的 membership_id 解除用户与旧用户组的绑定。</p>
+<p><strong>处理规则：</strong></p>
+<ol><li>路径参数传 identity_store_id 与 membership_id，无请求体；</li><li>接口成功时无响应体，以 HTTP 2xx 成功返回作为迁移完成标志；</li><li>响应 404 且语义为成员关系不存在时，视为目标已达成，状态置 ALREADY_REMOVED（幂等成功），不计为失败；</li><li>其他错误按第八章异常处理策略处理。</li></ol>
+<p><strong>验收标准：</strong></p>
+<ul><li>Given 已取得有效 membership_id，When 调用解绑接口，Then 返回成功，该用户在旧组中的成员关系被移除，状态记为成功。</li><li>Given 该成员关系已被移除（重复执行），When 再次调用解绑接口，Then 状态记为&quot;已移除&quot;，任务整体仍可正常结束。</li><li>Given 解绑成功但后续无任何校验调用，When 任务结束，Then 执行记录中包含解绑时间、membership_id 与请求 request_id，供事后核对。</li></ul>
+<h2 id="section-24">5.4 FR-04 用户加入新组（功能二）</h2>
+<p><strong>优先级：</strong> 必须（Must）</p>
+<p><strong>需求描述：</strong> 先通过 ListGroups 选定目标用户组，再通过 CreateGroupMembership 将用户绑定至该组。</p>
+<p><strong>步骤一：选组（每批次执行一次）</strong></p>
+<ol><li>调用 ListGroups，Query 参数可传 display_name 做模糊查询缩小范围，limit 取 100，按 next_marker 翻页取全；</li><li>在返回的 groups[] 中按 display_name 精确匹配配置的目标组名称，取出其 group_id；</li><li>匹配唯一 → 缓存 group_id 供本批次全部用户复用，不逐用户重复调用；</li><li>匹配为 0 条 → 全局致命错误 FATAL_TARGET_GROUP_NOT_FOUND，整个任务终止（后续绑定必然失败）；</li><li>匹配多条同名组 → 全局致命错误 FATAL_TARGET_GROUP_AMBIGUOUS，任务终止并提示人工指定 group_id。</li></ol>
+<p><strong>步骤二：绑定（每用户一次）</strong></p>
+<ol><li>请求体传 group_id、member_id.user_id、identity_store_id；</li><li>响应返回 membership_id 即视为加入成功；</li><li>响应 409 且语义为关系已存在时，视为幂等成功，状态置 ALREADY_JOINED。</li></ol>
+<p><strong>验收标准：</strong></p>
+<ul><li>Given 目标组 display_name 在身份源内唯一存在，When 执行选组，Then 取得唯一 group_id 并在本批次内复用，ListGroups 调用次数不随用户数线性增长。</li><li>Given 目标组名称模糊匹配到多个候选但无精确匹配，When 执行选组，Then 任务终止并提示可用候选列表。</li><li>Given 目标组同名存在多个，When 执行选组，Then 任务终止并提示人工指定 group_id，不执行任何绑定。</li><li>Given 已取得 group_id，When 对用户执行绑定，Then 返回 membership_id，用户获得目标组的全部权限。</li><li>Given 用户已在目标组中，When 重复执行绑定，Then 状态记为&quot;已加入&quot;，不计为失败。</li></ul>
+<h2 id="section-25">5.5 FR-05 批量迁移编排</h2>
+<p><strong>优先级：</strong> 必须（Must）</p>
+<p><strong>需求描述：</strong> 按用户清单逐条执行迁移，严格遵循&quot;先加入新组、再退出旧组&quot;的顺序。</p>
+<p><strong>编排规则：</strong></p>
+<ol><li>任务级前置：完成 FR-01 校验与 FR-04 选组，取得 group_id；</li><li>单用户执行顺序：绑定新组（FR-04 步骤二）→ 解绑旧组（FR-02 + FR-03）；</li><li>若绑定失败，则该用户不执行解绑（避免产生权限空档），状态置失败并进入重试；</li><li>若绑定成功而解绑失败，状态置&quot;部分成功&quot;，用户同时拥有新旧两组权限，记入待处理清单；</li><li>单个用户失败不中断批次，继续下一用户；</li><li>命中全局致命错误时立即中止，保留已完成用户的执行记录，支持断点续跑。</li></ol>
+<p><strong>验收标准：</strong></p>
+<ul><li>Given 批次含 N 个用户，When 执行迁移，Then 每个用户均先完成绑定再执行解绑，执行记录中的时间戳顺序可验证该顺序。</li><li>Given 某用户绑定失败，When 处理该用户，Then 不调用解绑接口，该用户权限保持不变。</li><li>Given 某用户绑定成功、解绑失败，When 汇总结果，Then 该用户计入&quot;部分成功&quot;，并在报告中单独列出。</li><li>Given 批次中第 K 个用户失败，When 继续执行，Then 第 K+1 个用户正常执行，任务不中断。</li></ul>
+<h2 id="section-26">5.6 FR-06 执行记录与结果汇总</h2>
+<p><strong>优先级：</strong> 必须（Must）</p>
+<p><strong>需求描述：</strong> 为每个用户生成一条结构化执行记录，并在任务结束后输出汇总报告。</p>
+<p><strong>汇总指标：</strong></p>
+<table>
+<thead><tr>
+<th>指标</th>
+<th>口径</th>
+</tr></thead>
+<tbody>
+<tr><td>总数</td><td>本批次输入 user_id 去重后的数量</td></tr>
+<tr><td>成功数</td><td>绑定成功且解绑成功（含&quot;已加入&quot;&quot;已移除&quot;幂等成功）的用户数</td></tr>
+<tr><td>跳过数</td><td>用户不在旧组（SKIPPED_NOT_IN_OLD_GROUP）且已成功加入新组的用户数</td></tr>
+<tr><td>部分成功数</td><td>绑定成功但解绑失败的用户数</td></tr>
+<tr><td>失败数</td><td>绑定失败的用户数（含重试后仍失败）</td></tr>
+<tr><td>成功率</td><td>成功数 ÷ 总数 × 100%，保留两位小数</td></tr>
+<tr><td>总耗时</td><td>任务结束时间减任务开始时间，单位秒</td></tr>
+</tbody></table>
+<p><strong>验收标准：</strong></p>
+<ul><li>Given 任务执行完毕，When 输出汇总，Then 成功数 + 跳过数 + 部分成功数 + 失败数等于总数。</li><li>Given 任务执行完毕，When 输出记录文件，Then 每条记录包含 user_id（脱敏）、状态、开始与结束时间、request_id、重试次数、错误码（如有）。</li><li>Given 任务因致命错误中止，When 输出汇总，Then 报告标注任务状态为&quot;中止&quot;，并列出已完成与未执行的用户数量。</li></ul>
+<h2 id="section-27">5.7 FR-07 失败重试与断点续跑</h2>
+<p><strong>优先级：</strong> 必须（Must）</p>
+<p><strong>需求描述：</strong> 对可重试错误按策略自动重试；任务中断后支持从断点继续，已成功用户不重复处理。</p>
+<p><strong>处理规则：</strong></p>
+<ol><li>可重试：网络超时、连接失败、HTTP 5xx、HTTP 429（限流）；</li><li>不可重试：4xx 中的参数错误、权限不足、资源不存在（404 在解绑场景按幂等处理）等业务语义错误；</li><li>重试次数上限 3 次，间隔采用指数退避（1s、2s、4s，可配置）；</li><li>重试仍失败 → 状态置失败，记录最后一次错误信息与 request_id；</li><li>断点续跑：以 user_id 为键，续跑时读取既有执行记录，状态为成功或已跳过的用户直接略过；</li><li>续跑不改变已有记录的原始时间戳，追加续跑批次标识。</li></ol>
+<p><strong>验收标准：</strong></p>
+<ul><li>Given 接口返回 500，When 执行调用，Then 系统按 1s/2s/4s 退避重试，最多 3 次，并在记录中体现重试次数。</li><li>Given 接口返回 403 权限不足，When 执行调用，Then 不重试，直接置失败并终止整个任务（权限问题对全批次同质）。</li><li>Given 任务在第 50 个用户处中断，When 以同一清单续跑，Then 前 49 个已成功用户被跳过，从第 50 个用户继续。</li></ul>
+<h2 id="section-28">5.8 FR-08 迁移预演（Dry Run）</h2>
+<p><strong>优先级：</strong> 应该（Should）</p>
+<p><strong>需求描述：</strong> 支持预演模式，仅执行配置校验、选组与&quot;查询用户所属组&quot;的只读调用，输出将执行的变更清单，不调用任何写接口。</p>
+<p><strong>验收标准：</strong></p>
+<ul><li>Given dry_run 为 true，When 执行任务，Then 仅产生读接口调用，输出每个用户的预期动作（加入目标组 / 无需解绑 / 需人工确认），不修改任何成员关系。</li><li>Given 预演输出，When 运维确认无误，Then 可切换为正式执行，配置无需重复录入。</li></ul>
+<p>---</p>
+<h1 class="section-header" id="section-29">六、外部接口需求</h1>
+<h2 id="section-30">6.1 接口总览</h2>
+<table>
+<thead><tr>
+<th>编号</th>
+<th>接口</th>
+<th>方法</th>
+<th>URI</th>
+<th>用途</th>
+<th>所属功能</th>
+</tr></thead>
+<tbody>
+<tr><td>API-01</td><td>列出用户加入的组 ListGroupMembershipsForMember</td><td>GET</td><td>/v1/identity-stores/{identity_store_id}/group-memberships-for-member</td><td>定位&quot;用户—旧组&quot;成员关系</td><td>F-02</td></tr>
+<tr><td>API-02</td><td>解绑用户和组 DeleteGroupMembership</td><td>DELETE</td><td>/v1/identity-stores/{identity_store_id}/group-memberships/{membership_id}</td><td>解除旧组绑定</td><td>F-02</td></tr>
+<tr><td>API-03</td><td>列出用户组 ListGroups</td><td>GET</td><td>/v1/identity-stores/{identity_store_id}/groups</td><td>选定目标组并取得 group_id</td><td>F-03</td></tr>
+<tr><td>API-04</td><td>绑定用户和组 CreateGroupMembership</td><td>POST</td><td>/v1/identity-stores/{identity_store_id}/group-memberships</td><td>建立新组绑定</td><td>F-03</td></tr>
+</tbody></table>
+<h2 id="section-31">6.2 接口契约</h2>
+<table>
+<thead><tr>
+<th>接口</th>
+<th>请求要点</th>
+<th>响应要点</th>
+<th>备注</th>
+</tr></thead>
+<tbody>
+<tr><td>API-01</td><td>Query：user_id（必选）、limit（1–100，缺省 100）、marker（分页标记）；使用临时安全凭据时需请求头 X-Security-Token</td><td>group_memberships[]（含 group_id、identity_store_id、member_id.user_id、membership_id）、page_info（next_marker、current_count）</td><td>需按 next_marker 翻页取全</td></tr>
+<tr><td>API-02</td><td>路径参数：identity_store_id、membership_id（均必选）；无请求体；使用临时安全凭据时需 X-Security-Token</td><td>成功：无响应体；异常返回 error_code、error_msg、request_id</td><td>以 2xx 为完成标志</td></tr>
+<tr><td>API-03</td><td>Query：display_name（按显示名模糊查询）、limit（1–100，缺省 100）、marker；使用临时安全凭据时需 X-Security-Token</td><td>groups[]（含 group_id、display_name、description、identity_store_id）、page_info</td><td>直接复用响应中的 group_id</td></tr>
+<tr><td>API-04</td><td>Body：group_id（必选）、member_id.user_id（必选）、identity_store_id</td><td>membership_id</td><td>用户与组须在同一身份源下</td></tr>
+</tbody></table>
+<h2 id="section-32">6.3 认证与调用主体要求</h2>
+<table>
+<thead><tr>
+<th>编号</th>
+<th>要求</th>
+</tr></thead>
+<tbody>
+<tr><td>IFR-01</td><td>四个接口均须由组织的管理账号或已配置为服务委托管理员的成员账号调用</td></tr>
+<tr><td>IFR-02</td><td>使用临时安全凭据时，所有请求须携带 X-Security-Token 会话令牌</td></tr>
+<tr><td>IFR-03</td><td>凭据不得硬编码于代码或配置文件中，须通过环境变量或凭据管理服务注入</td></tr>
+<tr><td>IFR-04</td><td>接口错误响应须完整记录 error_code、error_msg、request_id，其中 request_id 为工单排查的关键依据</td></tr>
+</tbody></table>
+<p>---</p>
+<h1 class="section-header" id="section-33">七、数据需求</h1>
+<h2 id="section-34">7.1 迁移任务数据</h2>
+<table>
+<thead><tr>
+<th>字段</th>
+<th>类型</th>
+<th>必填</th>
+<th>说明</th>
+<th>来源</th>
+</tr></thead>
+<tbody>
+<tr><td>task_id</td><td>字符串</td><td>是</td><td>任务唯一标识</td><td>系统生成</td></tr>
+<tr><td>batch_no</td><td>字符串</td><td>否</td><td>批次标识，用于分批次迁移与续跑</td><td>系统生成</td></tr>
+<tr><td>identity_store_id</td><td>字符串</td><td>是</td><td>身份源 ID，长度 12 位</td><td>配置</td></tr>
+<tr><td>old_group_id</td><td>字符串</td><td>是</td><td>旧用户组 ID</td><td>配置/任务参数</td></tr>
+<tr><td>target_group_id</td><td>字符串</td><td>是</td><td>目标组 ID，选组后回填</td><td>API-03</td></tr>
+<tr><td>total_count</td><td>整数</td><td>是</td><td>本批次用户总数</td><td>清单统计</td></tr>
+<tr><td>status</td><td>枚举</td><td>是</td><td>任务状态，见 7.4 状态机</td><td>系统生成</td></tr>
+<tr><td>started_at / finished_at</td><td>时间戳</td><td>是</td><td>任务起止时间（ISO 8601）</td><td>系统生成</td></tr>
+<tr><td>operator</td><td>字符串</td><td>是</td><td>执行人账号标识</td><td>系统获取</td></tr>
+</tbody></table>
+<h2 id="section-35">7.2 单用户迁移记录数据</h2>
+<table>
+<thead><tr>
+<th>字段</th>
+<th>类型</th>
+<th>必填</th>
+<th>说明</th>
+</tr></thead>
+<tbody>
+<tr><td>user_id</td><td>字符串</td><td>是</td><td>用户标识，展示与导出时脱敏（保留首尾各 3 位）</td></tr>
+<tr><td>old_membership_id</td><td>字符串</td><td>否</td><td>解绑前取得的成员关系 ID</td></tr>
+<tr><td>new_membership_id</td><td>字符串</td><td>否</td><td>绑定成功后返回的成员关系 ID</td></tr>
+<tr><td>add_status</td><td>枚举</td><td>是</td><td>SUCCESS / ALREADY_JOINED / FAILED / SKIPPED</td></tr>
+<tr><td>remove_status</td><td>枚举</td><td>是</td><td>SUCCESS / ALREADY_REMOVED / SKIPPED_NOT_IN_OLD_GROUP / FAILED / NOT_EXECUTED</td></tr>
+<tr><td>final_status</td><td>枚举</td><td>是</td><td>SUCCESS / PARTIAL / SKIPPED / FAILED</td></tr>
+<tr><td>retry_count</td><td>整数</td><td>是</td><td>本用户累计重试次数</td></tr>
+<tr><td>error_code / error_msg</td><td>字符串</td><td>否</td><td>失败时的错误码与错误信息</td></tr>
+<tr><td>request_id</td><td>字符串</td><td>否</td><td>接口请求标识，用于工单排查</td></tr>
+<tr><td>started_at / finished_at</td><td>时间戳</td><td>是</td><td>单用户处理起止时间</td></tr>
+</tbody></table>
+<h2 id="section-36">7.3 日志与审计数据</h2>
+<table>
+<thead><tr>
+<th>编号</th>
+<th>要求</th>
+</tr></thead>
+<tbody>
+<tr><td>DAT-01</td><td>日志须为结构化格式（JSON Lines），包含任务标识、用户标识（脱敏）、接口名、耗时、结果状态</td></tr>
+<tr><td>DAT-02</td><td>写操作（解绑、绑定）必须留痕，含操作时间、操作主体、目标对象与结果，留存期不少于 6 个月（待 TBD-05 确认）</td></tr>
+<tr><td>DAT-03</td><td>凭据、会话令牌、完整 user_id 不得出现在日志与导出文件中</td></tr>
+<tr><td>DAT-04</td><td>执行记录与汇总报告以文件形式落盘（JSON 或 CSV），供审计与复核</td></tr>
+</tbody></table>
+<h2 id="section-37">7.4 状态设计</h2>
+<p><strong>任务状态：</strong></p>
+<table>
+<thead><tr>
+<th>状态</th>
+<th>说明</th>
+<th>允许的迁移</th>
+</tr></thead>
+<tbody>
+<tr><td>INIT</td><td>已创建，未开始</td><td>→ CONFIG_VALIDATED / ABORTED</td></tr>
+<tr><td>CONFIG_VALIDATED</td><td>配置校验通过</td><td>→ GROUP_RESOLVED / ABORTED</td></tr>
+<tr><td>GROUP_RESOLVED</td><td>目标组已确定</td><td>→ RUNNING / ABORTED</td></tr>
+<tr><td>RUNNING</td><td>执行中</td><td>→ COMPLETED / PARTIAL_COMPLETED / ABORTED</td></tr>
+<tr><td>COMPLETED</td><td>全部成功</td><td>终态</td></tr>
+<tr><td>PARTIAL_COMPLETED</td><td>存在失败或部分成功用户</td><td>→ RUNNING（续跑）</td></tr>
+<tr><td>ABORTED</td><td>因致命错误中止</td><td>→ RUNNING（续跑）</td></tr>
+</tbody></table>
+<p><strong>单用户状态：</strong></p>
+<table>
+<thead><tr>
+<th>状态</th>
+<th>说明</th>
+</tr></thead>
+<tbody>
+<tr><td>PENDING</td><td>待处理</td></tr>
+<tr><td>JOINING / LEAVING</td><td>执行绑定／解绑中</td></tr>
+<tr><td>SUCCESS</td><td>绑定与解绑均成功（含幂等成功）</td></tr>
+<tr><td>SKIPPED</td><td>已加入新组且本就不在旧组，无需变更</td></tr>
+<tr><td>PARTIAL</td><td>绑定成功、解绑失败，用户同时属于新旧两组</td></tr>
+<tr><td>FAILED</td><td>绑定失败，未执行解绑</td></tr>
+<tr><td>RETRYING</td><td>处于重试等待</td></tr>
+</tbody></table>
+<p>---</p>
+<h1 class="section-header" id="section-38">八、异常处理需求</h1>
+<h2 id="section-39">8.1 异常分类与处理策略</h2>
+<table>
+<thead><tr>
+<th>编号</th>
+<th>异常场景</th>
+<th>判定依据</th>
+<th>处理策略</th>
+<th>是否重试</th>
+<th>用户状态</th>
+</tr></thead>
+<tbody>
+<tr><td>EX-01</td><td>网络超时／连接失败</td><td>请求异常无响应</td><td>指数退避重试</td><td>是（≤3 次）</td><td>RETRYING → FAILED</td></tr>
+<tr><td>EX-02</td><td>服务端错误</td><td>HTTP 5xx</td><td>指数退避重试</td><td>是（≤3 次）</td><td>同上</td></tr>
+<tr><td>EX-03</td><td>触发限流</td><td>HTTP 429</td><td>加大退避间隔后重试</td><td>是（≤3 次）</td><td>同上</td></tr>
+<tr><td>EX-04</td><td>认证失败／凭据过期</td><td>HTTP 401</td><td>立即中止整个任务</td><td>否</td><td>任务 ABORTED</td></tr>
+<tr><td>EX-05</td><td>权限不足</td><td>HTTP 403</td><td>立即中止整个任务（权限问题对全批次同质）</td><td>否</td><td>任务 ABORTED</td></tr>
+<tr><td>EX-06</td><td>成员关系不存在（解绑）</td><td>HTTP 404</td><td>视为已达成目标，记幂等成功</td><td>否</td><td>ALREADY_REMOVED</td></tr>
+<tr><td>EX-07</td><td>成员关系已存在（绑定）</td><td>HTTP 409</td><td>视为已达成目标，记幂等成功</td><td>否</td><td>ALREADY_JOINED</td></tr>
+<tr><td>EX-08</td><td>请求参数非法</td><td>HTTP 400</td><td>不重试，记录参数快照，跳过该用户</td><td>否</td><td>FAILED</td></tr>
+<tr><td>EX-09</td><td>目标组不存在</td><td>选组结果为空</td><td>全局致命，任务中止</td><td>否</td><td>任务 ABORTED</td></tr>
+<tr><td>EX-10</td><td>目标组同名多条</td><td>选组结果多条精确匹配</td><td>全局致命，任务中止并提示人工指定</td><td>否</td><td>任务 ABORTED</td></tr>
+<tr><td>EX-11</td><td>分页翻页中断</td><td>翻页请求失败</td><td>对当前页重试，重试耗尽则该用户失败</td><td>是</td><td>FAILED</td></tr>
+<tr><td>EX-12</td><td>用户不在旧组</td><td>查询结果无匹配</td><td>跳过解绑，不视为异常</td><td>否</td><td>SKIPPED_NOT_IN_OLD_GROUP</td></tr>
+<tr><td>EX-13</td><td>用户与组不在同一身份源</td><td>HTTP 400 且语义指明身份源不匹配</td><td>不重试，记录并要求人工核对</td><td>否</td><td>FAILED</td></tr>
+<tr><td>EX-14</td><td>清单存在无效 user_id</td><td>格式校验不通过</td><td>记录并跳过，任务继续</td><td>否</td><td>SKIPPED</td></tr>
+</tbody></table>
+<p class="quote">&nbsp;&nbsp;错误码取值以 REF-02《IAM 身份中心 API 参考》为准，本文档只定义处理策略与状态映射，不重复罗列全部错误码。</p>
+<h2 id="section-40">8.2 边界条件</h2>
+<table>
+<thead><tr>
+<th>编号</th>
+<th>边界场景</th>
+<th>要求</th>
+</tr></thead>
+<tbody>
+<tr><td>BD-01</td><td>用户所属组数量超过 100</td><td>必须翻页取全，不得遗漏</td></tr>
+<tr><td>BD-02</td><td>目标组成员已达上限</td><td>绑定失败，记录错误并提示人工处理</td></tr>
+<tr><td>BD-03</td><td>清单规模极大（超过单批次上限）</td><td>支持按批次切分，批次间串行执行，记录批次标识</td></tr>
+<tr><td>BD-04</td><td>任务执行中进程被中断</td><td>已落盘记录不丢失，支持续跑</td></tr>
+<tr><td>BD-05</td><td>同一用户被重复列入清单</td><td>去重后执行一次，报告标注重复项</td></tr>
+</tbody></table>
+<p>---</p>
+<h1 class="section-header" id="section-41">九、非功能需求</h1>
+<h2 id="section-42">9.1 性能需求</h2>
+<table>
+<thead><tr>
+<th>编号</th>
+<th>指标</th>
+<th>目标值</th>
+<th>说明</th>
+</tr></thead>
+<tbody>
+<tr><td>NFR-P-01</td><td>单用户迁移耗时</td><td>平均 ≤ 3 秒（不含重试）</td><td>含 1 次查询 + 1 次绑定 + 1 次查询 + 1 次解绑，估算值，待压测校准</td></tr>
+<tr><td>NFR-P-02</td><td>1000 用户串行总耗时</td><td>≤ 约 50 分钟</td><td>基于 NFR-P-01 估算，实际受接口限流影响</td></tr>
+<tr><td>NFR-P-03</td><td>选组接口调用次数</td><td>每批次 1 次（含翻页）</td><td>不得随用户数线性增长</td></tr>
+<tr><td>NFR-P-04</td><td>单接口超时时间</td><td>连接 5 秒、读取 15 秒</td><td>可配置</td></tr>
+<tr><td>NFR-P-05</td><td>并发度</td><td>默认 1，上限 3</td><td>待 TBD-03 结合限流阈值确认</td></tr>
+</tbody></table>
+<h2 id="section-43">9.2 可靠性需求</h2>
+<table>
+<thead><tr>
+<th>编号</th>
+<th>要求</th>
+</tr></thead>
+<tbody>
+<tr><td>NFR-R-01</td><td>写操作须具备幂等语义：重复绑定返回 409、重复解绑返回 404 均视为成功</td></tr>
+<tr><td>NFR-R-02</td><td>任务可断点续跑，续跑不重复处理已成功用户，且不改变历史记录</td></tr>
+<tr><td>NFR-R-03</td><td>记录须即时落盘（每用户处理完成即写入），进程异常退出不丢失已完成结果</td></tr>
+<tr><td>NFR-R-04</td><td>不得出现&quot;先解绑后绑定&quot;的执行顺序，这是避免权限空档的硬约束</td></tr>
+</tbody></table>
+<h2 id="section-44">9.3 安全需求</h2>
+<table>
+<thead><tr>
+<th>编号</th>
+<th>要求</th>
+</tr></thead>
+<tbody>
+<tr><td>NFR-S-01</td><td>遵循最小权限原则，调用账号仅授予 4 个接口所需权限，不授予身份中心管理类全量权限</td></tr>
+<tr><td>NFR-S-02</td><td>凭据通过环境变量或凭据管理服务注入，禁止写入代码、配置文件与日志</td></tr>
+<tr><td>NFR-S-03</td><td>日志与导出文件中 user_id 脱敏展示，完整值仅在受控存储中保留</td></tr>
+<tr><td>NFR-S-04</td><td>任务执行主体与执行时间须留痕，满足审计追溯要求</td></tr>
+<tr><td>NFR-S-05</td><td>正式执行前须完成授权审批（迁移清单、目标组、执行窗口），预演结果作为审批输入</td></tr>
+</tbody></table>
+<h2 id="section-45">9.4 可维护性与可观测性需求</h2>
+<table>
+<thead><tr>
+<th>编号</th>
+<th>要求</th>
+</tr></thead>
+<tbody>
+<tr><td>NFR-M-01</td><td>配置项集中管理，新增批次或调整目标组无需改动代码</td></tr>
+<tr><td>NFR-M-02</td><td>日志区分 INFO／WARN／ERROR 级别，关键节点（配置校验、选组、单用户完成、任务结束）均有记录</td></tr>
+<tr><td>NFR-M-03</td><td>汇总报告可被人工直接阅读，也可被脚本解析</td></tr>
+<tr><td>NFR-M-04</td><td>代码须可复用：两个功能相互独立，允许单独调用与单独重试</td></tr>
+</tbody></table>
+<h2 id="section-46">9.5 兼容性需求</h2>
+<table>
+<thead><tr>
+<th>编号</th>
+<th>要求</th>
+</tr></thead>
+<tbody>
+<tr><td>NFR-C-01</td><td>接口文档版本以 REF-02（版本 02）为准；接口若发生变更，须评估升级影响</td></tr>
+<tr><td>NFR-C-02</td><td>运行环境支持 Linux 与 Windows 主流版本（按运维实际环境确认，待 TBD-04）</td></tr>
+</tbody></table>
+<p>---</p>
+<h1 class="section-header" id="section-47">十、业务流程设计</h1>
+<h2 id="section-48">10.1 批量迁移主流程</h2>
+<ol><li><strong>开始</strong> → 加载配置 → FR-01 校验；</li><li>校验失败 → 任务 ABORTED，输出错误明细，<strong>结束</strong>；</li><li>校验通过 → 任务 CONFIG_VALIDATED → 执行 FR-04 步骤一（选组）；</li><li>选组失败（0 条或多条同名）→ 任务 ABORTED，输出候选列表，<strong>结束</strong>；</li><li>选组成功 → 缓存 group_id，任务 GROUP_RESOLVED → 遍历用户清单（去重后）；</li><li>对每个用户：</li></ol>
+<ul><li>a. 绑定新组（FR-04 步骤二）→ 失败则记录 FAILED，<strong>跳过解绑</strong>，进入下一个用户；</li><li>b. 绑定成功 → 查询用户所属组（FR-02）→ 按 next_marker 翻页取全；</li><li>c. 匹配到旧组 → 解绑（FR-03）→ 成功记 SUCCESS，失败记 PARTIAL；</li><li>d. 未匹配到旧组 → 记 SKIPPED，不调用解绑；</li></ul>
+<ol><li>全部用户处理完毕 → 输出汇总报告 → 任务 COMPLETED 或 PARTIAL_COMPLETED，<strong>结束</strong>；</li><li>过程中命中致命错误 → 保存已完成记录 → 任务 ABORTED，<strong>结束</strong>（支持续跑）。</li></ol>
+<h2 id="section-49">10.2 编排顺序说明</h2>
+<p>业务侧已明确：仅将用户加入新组不会自动剥离旧组权限，旧组权限在&quot;退出旧组&quot;完成后才失效。因此按&quot;先加入新组、再退出旧组&quot;执行，用户在整个过程中同时拥有新旧两组的权限并集，不存在权限空档。若顺序颠倒，用户将在一段时间内不含任何一组的权限，可能导致业务中断。</p>
+<h2 id="section-50">10.3 时序说明（单用户）</h2>
+<table>
+<thead><tr>
+<th>步骤</th>
+<th>动作</th>
+<th>依赖</th>
+<th>失败影响</th>
+</tr></thead>
+<tbody>
+<tr><td>1</td><td>调用 API-04 绑定新组</td><td>已取得 group_id</td><td>用户权限不变，状态 FAILED</td></tr>
+<tr><td>2</td><td>调用 API-01 查询所属组</td><td>绑定成功</td><td>用户已获新组权限，旧组未剥离，状态 PARTIAL</td></tr>
+<tr><td>3</td><td>调用 API-02 解绑旧组</td><td>已取得 membership_id</td><td>同上，状态 PARTIAL</td></tr>
+</tbody></table>
+<p>---</p>
+<h1 class="section-header" id="section-51">十一、验收标准</h1>
+<table>
+<thead><tr>
+<th>编号</th>
+<th>验收场景</th>
+<th>前置条件</th>
+<th>预期结果</th>
+</tr></thead>
+<tbody>
+<tr><td>AC-01</td><td>完整迁移正常用户</td><td>用户属于旧组，目标组存在且唯一</td><td>绑定成功、解绑成功，最终只属于新组，状态 SUCCESS</td></tr>
+<tr><td>AC-02</td><td>用户不在旧组</td><td>用户不属于旧组</td><td>绑定成功，跳过解绑，状态 SKIPPED，不计失败</td></tr>
+<tr><td>AC-03</td><td>权限空档验证</td><td>迁移过程中持续观测</td><td>任一时点用户至少拥有新组权限，未出现两组权限均缺失</td></tr>
+<tr><td>AC-04</td><td>目标组不存在</td><td>配置的目标组名称无匹配</td><td>任务 ABORTED，无任何写操作发生</td></tr>
+<tr><td>AC-05</td><td>目标组同名多条</td><td>存在多个同名组</td><td>任务 ABORTED，提示人工指定 group_id</td></tr>
+<tr><td>AC-06</td><td>配置非法</td><td>identity_store_id 长度不为 12</td><td>任务终止，无接口调用</td></tr>
+<tr><td>AC-07</td><td>批量执行</td><td>清单含 100 个混合状态用户</td><td>各状态计数之和等于总数，报告可核对</td></tr>
+<tr><td>AC-08</td><td>断点续跑</td><td>任务中途中断后以同一清单重跑</td><td>已成功用户被跳过，未完成用户继续执行</td></tr>
+<tr><td>AC-09</td><td>审计留痕</td><td>任务执行完毕</td><td>每条写操作记录含时间、主体、对象、结果、request_id</td></tr>
+<tr><td>AC-10</td><td>预演模式</td><td>dry_run=true</td><td>无写接口调用，输出预期动作清单</td></tr>
+<tr><td>AC-11</td><td>幂等验证</td><td>对同一用户重复执行迁移</td><td>不产生重复成员关系，状态记为幂等成功</td></tr>
+<tr><td>AC-12</td><td>分页完整性</td><td>用户所属组超过 100 个</td><td>翻页取全，正确匹配旧组</td></tr>
+</tbody></table>
+<p>---</p>
+<h1 class="section-header" id="section-52">十二、需求追踪矩阵（RTM）</h1>
+<table>
+<thead><tr>
+<th>需求编号</th>
+<th>需求名称</th>
+<th>业务规则</th>
+<th>章节</th>
+<th>接口</th>
+<th>验收用例</th>
+</tr></thead>
+<tbody>
+<tr><td>FR-01</td><td>配置加载与校验</td><td>CST-01</td><td>5.1</td><td>—</td><td>AC-06</td></tr>
+<tr><td>FR-02</td><td>查询用户所属用户组</td><td>CST-02、CST-03</td><td>5.2</td><td>API-01</td><td>AC-12、AC-02</td></tr>
+<tr><td>FR-03</td><td>用户退出旧组</td><td>BR-03</td><td>5.3</td><td>API-02</td><td>AC-01、AC-11</td></tr>
+<tr><td>FR-04</td><td>用户加入新组</td><td>CST-05、CST-07</td><td>5.4</td><td>API-03、API-04</td><td>AC-04、AC-05</td></tr>
+<tr><td>FR-05</td><td>批量迁移编排</td><td>BR-01、BR-02、BR-05</td><td>5.5</td><td>组合</td><td>AC-03、AC-07</td></tr>
+<tr><td>FR-06</td><td>执行记录与汇总</td><td>DAT-01~04</td><td>5.6</td><td>—</td><td>AC-07、AC-09</td></tr>
+<tr><td>FR-07</td><td>失败重试与断点续跑</td><td>NFR-R-01~03</td><td>5.7</td><td>组合</td><td>AC-08、AC-11</td></tr>
+<tr><td>FR-08</td><td>迁移预演</td><td>NFR-S-05</td><td>5.8</td><td>API-01、API-03</td><td>AC-10</td></tr>
+</tbody></table>
+<p>---</p>
+<h1 class="section-header" id="section-53">十三、风险与遗留问题</h1>
+<h2 id="section-54">13.1 风险登记册</h2>
+<table>
+<thead><tr>
+<th>编号</th>
+<th>风险描述</th>
+<th>类别</th>
+<th>概率</th>
+<th>影响</th>
+<th>等级</th>
+<th>应对措施</th>
+</tr></thead>
+<tbody>
+<tr><td>RK-01</td><td>编排顺序被误改为&quot;先解绑后绑定&quot;，导致批量权限空档与业务中断</td><td>需求/技术</td><td>2</td><td>5</td><td>中（10）</td><td>BR-01 写为硬约束；NFR-R-04 明确禁止；代码评审与用例 AC-03 强制校验</td></tr>
+<tr><td>RK-02</td><td>目标组同名多条导致误绑，用户被授予错误权限</td><td>技术</td><td>3</td><td>5</td><td>高（15）</td><td>FR-04 步骤一强制精确匹配与中止策略；执行前预演核对（FR-08）</td></tr>
+<tr><td>RK-03</td><td>接口限流导致大批量任务长时间失败或超时</td><td>技术</td><td>3</td><td>3</td><td>中（9）</td><td>并发度可配、默认串行；429 退避重试；分批执行</td></tr>
+<tr><td>RK-04</td><td>不做事后校验抽查，误操作无法被自动发现</td><td>需求</td><td>4</td><td>4</td><td>高（16）</td><td>以结构化执行记录 + 汇总报告 + 人工抽检补偿；建议后续版本补充校验能力</td></tr>
+<tr><td>RK-05</td><td>临时安全凭据在长任务中过期，导致批量中断</td><td>技术</td><td>3</td><td>4</td><td>中（12）</td><td>优先使用长期凭据或按批次刷新凭据；任务分批次控制在凭据有效期内</td></tr>
+<tr><td>RK-06</td><td>存量用户清单不完整，迁移后仍有用户持有旧权限</td><td>数据</td><td>3</td><td>4</td><td>中（12）</td><td>清单来源需与权限盘点结果核对，由安全侧确认完整性</td></tr>
+<tr><td>RK-07</td><td>旧组内存在业务必需权限，剥离后影响业务运行</td><td>需求</td><td>2</td><td>5</td><td>中（10）</td><td>迁移前由业务负责人确认旧组权限清单；保留回退方案</td></tr>
+<tr><td>RK-08</td><td>调用账号权限过大，违反最小权限原则</td><td>合规</td><td>2</td><td>4</td><td>低（8）</td><td>NFR-S-01 限定授权范围；授权清单纳入安全评审</td></tr>
+</tbody></table>
+<h2 id="section-55">13.2 待确认事项</h2>
+<table>
+<thead><tr>
+<th>编号</th>
+<th>待确认内容</th>
+<th>影响范围</th>
+<th>建议确认方</th>
+</tr></thead>
+<tbody>
+<tr><td>TBD-01</td><td>存量用户实际规模与批次切分粒度</td><td>性能指标、批次策略</td><td>业务侧</td></tr>
+<tr><td>TBD-02</td><td>身份中心服务所在 Region 与 Endpoint</td><td>运行环境配置</td><td>云平台运维</td></tr>
+<tr><td>TBD-03</td><td>接口限流阈值与可接受的并发度上限</td><td>性能指标、重试策略</td><td>云平台运维</td></tr>
+<tr><td>TBD-04</td><td>任务运行环境（操作系统、运行时、是否容器化）</td><td>部署方式</td><td>研发/运维</td></tr>
+<tr><td>TBD-05</td><td>执行记录与审计日志的留存期限要求</td><td>数据留存</td><td>安全合规</td></tr>
+<tr><td>TBD-06</td><td>是否需要落库（数据库）还是仅文件留痕</td><td>数据设计</td><td>研发</td></tr>
+<tr><td>TBD-07</td><td>目标组与旧组的权限差异清单是否已确认</td><td>迁移后业务可用性</td><td>业务负责人</td></tr>
+<tr><td>TBD-08</td><td>是否需要迁移后的人工抽检流程与责任人</td><td>风险 RK-04 缓解</td><td>安全合规</td></tr>
+</tbody></table>
+<h2 id="section-56">13.3 回退方案</h2>
+<p>若迁移后发现业务受影响，回退方式为反向操作：将用户重新加入旧用户组（CreateGroupMembership），并从新用户组解绑（ListGroupMembershipsForMember + DeleteGroupMembership），与本期实现复用同一组接口。回退须基于执行记录中的 membership_id 与 user_id 精确定位对象，并由安全侧审批后执行。</p>
+<p>---</p>
+<h1 class="section-header" id="section-57">十四、附录</h1>
+<h2 id="section-58">14.1 接口调用顺序示意</h2>
+<table>
+<thead><tr>
+<th>序号</th>
+<th>功能一（退出旧组）</th>
+<th>功能二（加入新组）</th>
+</tr></thead>
+<tbody>
+<tr><td>1</td><td>ListGroupMembershipsForMember（翻页取全）</td><td>ListGroups（按显示名匹配，取 group_id）</td></tr>
+<tr><td>2</td><td>匹配 group_id = old_group_id，取 membership_id</td><td>CreateGroupMembership（传 group_id + member_id.user_id）</td></tr>
+<tr><td>3</td><td>DeleteGroupMembership（传 membership_id）</td><td>响应返回 membership_id，完成</td></tr>
+</tbody></table>
+<h2 id="section-59">14.2 最小权限清单（建议）</h2>
+<table>
+<thead><tr>
+<th>权限项</th>
+<th>对应接口</th>
+<th>用途</th>
+</tr></thead>
+<tbody>
+<tr><td>查询用户所属用户组</td><td>API-01</td><td>定位成员关系</td></tr>
+<tr><td>删除成员关系</td><td>API-02</td><td>退出旧组</td></tr>
+<tr><td>查询用户组列表</td><td>API-03</td><td>选定目标组</td></tr>
+<tr><td>创建成员关系</td><td>API-04</td><td>加入新组</td></tr>
+</tbody></table>
+<p class="quote">&nbsp;&nbsp;具体权限名称与授权方式以华为云 IAM 权限策略文档为准，须在安全评审时核对。</p>
+<h2 id="section-60">14.3 编制说明</h2>
+<p>本文档依据内部业务描述文档与《IAM 身份中心 API 参考》编制。文中涉及的接口路径、参数、分页与调用主体要求来自接口文档；性能指标、并发度、留存期等数值为基于业务规模的估算或建议值，已在对应位置标注，最终以压测结果与相关方确认为准。</p>
+<p>---</p>
+<p class="quote">&nbsp;&nbsp;本方案为产品设计参考，具体实施请结合公司合规与法务要求确认。</p>
+</section>
+</body>
+</html>
