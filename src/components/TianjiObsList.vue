@@ -15,6 +15,16 @@
           <span>创建</span>
         </button>
 
+        <button class="btn-outline" @click="handleOpenRecycleBin">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            <line x1="10" y1="11" x2="10" y2="17"/>
+            <line x1="14" y1="11" x2="14" y2="17"/>
+          </svg>
+          <span>回收站</span>
+        </button>
+
         <button class="btn-outline" @click="handleExport">
           <span>导出清单</span>
         </button>
@@ -120,6 +130,7 @@
               <div class="op-actions">
                 <a class="op-btn" @click="handleOpenAuth(item)">创建访问授权</a>
                 <a class="op-btn" @click="handleOpenExpand(item)">桶扩容</a>
+                <a class="op-btn" @click="handleOpenRecycle(item)">回收</a>
                 <a class="op-btn" @click="handleOpenDelete(item)">删除</a>
               </div>
             </td>
@@ -236,6 +247,12 @@
       @confirm="handleConfirmExpand" 
     />
 
+        <TianjiObsRecycleModal 
+      v-model:visible="showRecycleModal" 
+      :bucket="currentBucket" 
+      @confirm="handleConfirmRecycle" 
+    />
+
     <TianjiObsDeleteModal 
       v-model:visible="showDeleteModal" 
       :bucket="currentBucket" 
@@ -249,6 +266,7 @@ import { ref, computed } from 'vue'
 import TianjiObsAuthModal from './TianjiObsAuthModal.vue'
 import TianjiObsExpandModal from './TianjiObsExpandModal.vue'
 import TianjiObsDeleteModal from './TianjiObsDeleteModal.vue'
+import TianjiObsRecycleModal from './TianjiObsRecycleModal.vue'
 
 const props = defineProps({
   buckets: {
@@ -257,7 +275,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['create', 'delete', 'expand', 'select-bucket', 'notify'])
+const emit = defineEmits(['create', 'delete', 'recycle', 'open-recycle', 'expand', 'select-bucket', 'notify'])
 
 // Table columns
 const columns = ref([
@@ -408,6 +426,22 @@ const handleOpenDelete = (item) => {
   showDeleteModal.value = true
 }
 
+
+const showRecycleModal = ref(false)
+
+const handleOpenRecycleBin = () => {
+  emit('open-recycle')
+}
+
+const handleOpenRecycle = (item) => {
+  currentBucket.value = item
+  showRecycleModal.value = true
+}
+
+const handleConfirmRecycle = (bucket) => {
+  emit('recycle', bucket)
+}
+
 const handleConfirmDelete = (bucketName) => {
   emit('delete', bucketName)
 }
@@ -435,6 +469,11 @@ const handleConfirmDelete = (bucketName) => {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.btn-outline .btn-icon {
+  width: 14px;
+  height: 14px;
 }
 
 .btn-create {

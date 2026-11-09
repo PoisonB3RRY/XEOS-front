@@ -172,7 +172,19 @@ const xuanwuMenuGroups = [
       { id: 'obs-user', name: '对象存储用户' }
     ]
   },
-  { id: 'trash', name: '回收站', icon: 'trash' },
+  { 
+    id: 'trash', 
+    name: '回收站', 
+    icon: 'trash',
+    children: [
+      { id: 'vm-recycle', name: '虚拟机回收站' },
+      { id: 'tianji-obs-recycle', name: '信创对象存储桶回收站' },
+      { id: 'clickhouse-recycle', name: 'ClickHouse回收站' },
+      { id: 'es-recycle', name: 'Elasticsearch回收站' },
+      { id: 'redis-recycle', name: 'Redis回收站' },
+      { id: 'db-recycle', name: 'DB回收站' }
+    ]
+  },
   { id: 'network', name: '网络服务', icon: 'network' }
 ]
 

@@ -60,8 +60,19 @@
             :buckets="tianjiBucketList"
             @create="handleOpenTianjiBucketCreate"
             @delete="handleDeleteTianjiBucket"
+            @recycle="handleRecycleTianjiBucket"
+            @open-recycle="handleOpenTianjiRecycleBin"
             @expand="handleExpandTianjiBucket"
             @select-bucket="handleSelectTianjiBucket"
+            @notify="showToast"
+          />
+
+          <!-- 信创对象存储-桶 回收站二级页面 -->
+          <TianjiObsRecycleBin 
+            v-else-if="currentView === 'tianji-obs-recycle'"
+            :recycle-list="tianjiRecycleList"
+            @back="handleCloseTianjiRecycleBin"
+            @restore="handleRestoreTianjiBucket"
             @notify="showToast"
           />
 
@@ -147,6 +158,7 @@ import SfsCreate from './components/SfsCreate.vue'
 import EvsList from './components/EvsList.vue'
 import TianjiObsList from './components/TianjiObsList.vue'
 import TianjiObsCreate from './components/TianjiObsCreate.vue'
+import TianjiObsRecycleBin from './components/TianjiObsRecycleBin.vue'
 
 // Top Product selection: default to 'tianji' to directly match user request
 const currentProduct = ref('tianji')
@@ -682,6 +694,47 @@ const generateMockTianjiBuckets = () => {
 
 const tianjiBucketList = ref(generateMockTianjiBuckets())
 
+// 80 items matching the user's uploaded screenshot (区域为上海或合肥)
+const generateMockTianjiRecycleList = () => {
+  const initialScreenshotItems = [
+    { name: 'esf-lahx-gw01', org: '企业级微服务平台', zone: '上海', status: '已回收', updater: '马逸飞', updateTime: '2026-11-09 11:07:41' },
+    { name: 'esf-dghx-mng', org: '企业级微服务平台', zone: '上海', status: '已回收', updater: '马逸飞', updateTime: '2026-11-09 11:07:41' },
+    { name: 'esf-syyg-gw02', org: '企业级微服务平台', zone: '合肥', status: '已回收', updater: '冯逸飞', updateTime: '2026-11-09 11:07:41' },
+    { name: 'esf-syyg-gw01', org: '企业级微服务平台', zone: '上海', status: '已回收', updater: '冯逸飞', updateTime: '2026-11-09 11:07:41' },
+    { name: 'esf-syyg-mng', org: '企业级微服务平台', zone: '合肥', status: '已回收', updater: '冯逸飞', updateTime: '2026-11-09 11:07:41' },
+    { name: 'esf-lahx-gw02', org: '企业级微服务平台', zone: '上海', status: '已回收', updater: '冯逸飞', updateTime: '2026-11-09 11:07:41' },
+    { name: 'esf-lahx-mng', org: '企业级微服务平台', zone: '合肥', status: '已回收', updater: '冯逸飞', updateTime: '2026-11-09 11:07:41' },
+    { name: 'esf-dghx-wg01', org: '企业级微服务平台', zone: '上海', status: '已回收', updater: '冯逸飞', updateTime: '2026-11-09 11:06:41' },
+    { name: 'esf-dghx-wg02', org: '企业级微服务平台', zone: '合肥', status: '已回收', updater: '冯逸飞', updateTime: '2026-11-09 11:06:41' },
+    { name: 'scmp-zb-mongodb02', org: '金融云平台管理系统', zone: '上海', status: '已回收', updater: '王中浩', updateTime: '2026-11-05 19:05:41' }
+  ]
+
+  const list = [...initialScreenshotItems]
+  const orgs = ['企业级微服务平台', '金融云平台管理系统', '移动支付清算平台', '数字员工智能孵化管理平台', '智能风控平台', '资产托管系统']
+  const updaters = ['冯逸飞', '马逸飞', '王中浩', '张文杰', '陈天翊', '李思思']
+  const zones = ['上海', '合肥']
+  const prefixes = ['esf-sys', 'scmp-node', 'pay-gw', 'risk-calc', 'auth-center', 'core-batch', 'ecif-data', 'ai-agent']
+
+  for (let i = 11; i <= 80; i++) {
+    const pref = prefixes[i % prefixes.length]
+    const num = String(i).padStart(2, '0')
+    const minute = String((i * 3) % 60).padStart(2, '0')
+    const second = String((i * 7) % 60).padStart(2, '0')
+    list.push({
+      name: pref + '-bucket-' + num,
+      org: orgs[i % orgs.length],
+      zone: zones[i % zones.length],
+      status: '已回收',
+      updater: updaters[i % updaters.length],
+      updateTime: '2026-11-0' + Math.max(1, 9 - Math.floor(i / 15)) + ' 11:' + minute + ':' + second
+    })
+  }
+  return list
+}
+
+const tianjiRecycleList = ref(generateMockTianjiRecycleList())
+
+
 // Selected VM instance data
 const selectedVm = ref({
   name: 'testlu01',
@@ -742,6 +795,8 @@ const handleMenuSelect = (menuId) => {
     currentView.value = 'bucket-list'
     activeTabId.value = 'obs-bucket'
     ensureTab({ id: 'obs-bucket', name: '对象存储桶', closable: true })
+  } else if (menuId === 'tianji-obs-recycle') {
+    handleOpenTianjiRecycleBin()
   } else if (menuId === 'tianji-obs-bucket') {
     currentView.value = 'tianji-obs-list'
     activeTabId.value = 'tianji-obs-bucket'
@@ -832,6 +887,53 @@ const handleExpandTianjiBucket = ({ name, quota }) => {
   }
 }
 
+
+// Tianji OBS Recycle Bin Handlers
+const handleOpenTianjiRecycleBin = () => {
+  currentView.value = 'tianji-obs-recycle'
+  activeTabId.value = 'tianji-obs-recycle'
+  ensureTab({ id: 'tianji-obs-recycle', name: '信创对象存储桶回收站', closable: true })
+}
+
+const handleCloseTianjiRecycleBin = () => {
+  currentView.value = 'tianji-obs-list'
+  activeTabId.value = 'tianji-obs-bucket'
+}
+
+const handleRecycleTianjiBucket = (bucket) => {
+  tianjiBucketList.value = tianjiBucketList.value.filter(b => b.name !== bucket.name)
+  const now = new Date()
+  const timeStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0') + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0')
+  
+  tianjiRecycleList.value.unshift({
+    name: bucket.name,
+    org: bucket.org,
+    zone: bucket.region || '上海',
+    status: '已回收',
+    updater: '冯逸飞',
+    updateTime: timeStr,
+    originalData: bucket
+  })
+  showToast('信创对象存储桶【' + bucket.name + '】已成功移入回收站', 'success')
+}
+
+const handleRestoreTianjiBucket = (item) => {
+  tianjiRecycleList.value = tianjiRecycleList.value.filter(r => r.name !== item.name)
+  const restored = item.originalData || {
+    name: item.name,
+    org: item.org,
+    region: '上海',
+    pool: 'ZH_DEV',
+    quota: '100G',
+    ha: '多AZ',
+    envType: '常态环境',
+    env: 'SIT',
+    createTime: item.updateTime
+  }
+  tianjiBucketList.value.unshift(restored)
+  showToast('存储桶【' + item.name + '】已成功恢复！', 'success')
+}
+
 const handleSelectTianjiBucket = (bucketName) => {
   selectedBucketName.value = bucketName
   detailDefaultTab.value = 'ccr'
@@ -869,7 +971,9 @@ const handleOpenAuth = (bucketName) => {
 }
 
 const handleGoBack = () => {
-  if (currentView.value === 'sfs-create') {
+  if (currentView.value === 'tianji-obs-recycle') {
+    handleCloseTianjiRecycleBin()
+  } else if (currentView.value === 'sfs-create') {
     currentView.value = 'sfs-list'
   } else if (currentView.value === 'tianji-obs-create') {
     currentView.value = 'tianji-obs-list'
@@ -920,6 +1024,9 @@ const handleTabClick = (tabId) => {
   } else if (tabId.startsWith('bucket-')) {
     currentView.value = 'bucket-detail'
     activeTabId.value = tabId
+  } else if (tabId === 'tianji-obs-recycle') {
+    currentView.value = 'tianji-obs-recycle'
+    activeTabId.value = 'tianji-obs-recycle'
   } else if (tabId === 'tianji-obs-bucket') {
     currentView.value = 'tianji-obs-list'
     currentMenu.value = 'tianji-obs-bucket'
@@ -954,6 +1061,7 @@ const menuTitles = {
   'obs-bucket': '对象存储桶',
   'obs-user': '对象存储用户',
   'tianji-obs-bucket': '信创对象存储-桶(OBS)',
+  'tianji-obs-recycle': '信创对象存储桶回收站',
   'tianji-obs-user': '信创对象存储-用户',
   'evs': '信创云硬盘(EVS)',
   'sfs': '信创文件存储(SFS)',
