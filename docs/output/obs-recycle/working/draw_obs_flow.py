@@ -198,7 +198,7 @@ def fig5():
                 "快照为空 → DeleteBucketPolicy"], "sub")
     a8 = f.add(["桶回到列表，业务恢复正常访问"], "end")
     keep = f.add_side(["取消回收", "桶维持在用状态", "无任何变更"], "note", a3, 1340)
-    stay = f.add_side(["保持静置、长期保留", "仍占用存储并正常计费"], "note", a6, 1340)
+    stay = f.add_side(["静默保留最多 90 天", "到期前 10/5/1 天邮件通知", "组织管理员销毁该桶"], "note", a6, 1340)
     f.down(a1, a2)
     f.down(a2, a3)
     f.down(a3, a4, "是")
