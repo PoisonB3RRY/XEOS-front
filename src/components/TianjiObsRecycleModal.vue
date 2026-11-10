@@ -19,19 +19,23 @@
           </div>
         </div>
 
-        <div class="instance-info-box">
-          <div class="info-row">
-            <span class="info-label">存储桶名称：</span>
-            <span class="info-value text-bold">{{ bucket?.name }}</span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">资源组织：</span>
-            <span class="info-value">{{ bucket?.org }}</span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">区域：</span>
-            <span class="info-value">{{ bucket?.region || '上海' }}</span>
-          </div>
+        <div class="info-table-wrap">
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>存储桶名称</th>
+                <th>资源组织</th>
+                <th>区域</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-bold">{{ bucket?.name }}</td>
+                <td>{{ bucket?.org }}</td>
+                <td>{{ bucket?.region || '上海' }}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -84,7 +88,8 @@ const handleConfirmRecycle = () => {
 }
 
 .modal-card {
-  width: 500px;
+  width: 560px;
+  max-width: 92vw;
   background: #ffffff;
   border-radius: 4px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
@@ -155,31 +160,33 @@ const handleConfirmRecycle = () => {
   margin-bottom: 4px;
 }
 
-.instance-info-box {
-  background-color: #f7f9fb;
-  border: 1px solid #eef2f6;
+.info-table-wrap {
+  border: 1px solid #e8ecef;
   border-radius: 4px;
-  padding: 12px 16px;
+  overflow: hidden;
 }
 
-.info-row {
-  display: flex;
-  margin-bottom: 8px;
+.info-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
   font-size: 13px;
 }
 
-.info-row:last-child {
-  margin-bottom: 0;
+.info-table thead th {
+  background-color: #f7f9fb;
+  color: #606266;
+  font-weight: 500;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e8ecef;
+  white-space: nowrap;
 }
 
-.info-label {
-  width: 95px;
-  color: #8c939d;
-  flex-shrink: 0;
-}
-
-.info-value {
+.info-table tbody td {
+  padding: 11px 12px;
   color: #303133;
+  background-color: #ffffff;
+  word-break: break-word;
 }
 
 .text-bold {

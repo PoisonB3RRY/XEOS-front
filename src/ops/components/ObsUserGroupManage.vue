@@ -16,10 +16,11 @@
                 <line x1="20" y1="8" x2="20" y2="14" />
                 <line x1="23" y1="11" x2="17" y2="11" />
               </svg>
-              <span>批量迁入（已选 {{ selectedCount }}/{{ MAX_SELECT }}）</span>
+              <span>批量迁入</span>
             </button>
           </span>
           <span class="limit-hint">单次最多勾选 {{ MAX_SELECT }} 个用户</span>
+          <span class="limit-hint">所勾选用户必须属于同一租户</span>
         </div>
 
         <div class="right-tools">
@@ -50,12 +51,13 @@
                   type="checkbox"
                   :checked="headerChecked"
                   :disabled="headerDisabled"
-                  :title="headerDisabled ? `单次最多勾选 ${MAX_SELECT} 个用户` : ''"
+                  :title="headerDisabledTip"
                   @change="toggleAllOnPage"
                 />
               </th>
               <th>用户名</th>
               <th class="col-group">当前用户组</th>
+              <th>租户名称</th>
               <th>资源组织</th>
               <th>区域</th>
               <th class="col-op">操作</th>
@@ -84,6 +86,7 @@
               <td class="col-group">
                 <a class="op-btn detail-btn" @click="openGroupDetailModal(u)">详情</a>
               </td>
+              <td>{{ u.tenant }}</td>
               <td>{{ u.org }}</td>
               <td>{{ u.region }}</td>
               <td class="col-op">
@@ -103,7 +106,7 @@
               </td>
             </tr>
             <tr v-if="pagedList.length === 0">
-              <td colspan="6" class="empty-cell">没有找到匹配的用户</td>
+              <td colspan="7" class="empty-cell">没有找到匹配的用户</td>
             </tr>
           </tbody>
         </table>
@@ -285,11 +288,11 @@
         <div class="modal-footer">
           <button class="btn-cancel-modal" @click="leaveModalVisible = false">取消</button>
           <button
-            class="btn-danger-submit"
+            class="btn-primary"
             :disabled="selectedLeaveGroups.length === 0 || isExecuting"
             @click="submitLeaveGroups"
           >
-            {{ isExecuting ? '退组中...' : `确认退出选中的 ${selectedLeaveGroups.length} 个用户组` }}
+            {{ isExecuting ? '退组中...' : '确认' }}
           </button>
         </div>
       </div>
@@ -357,6 +360,7 @@ const getGroupPolicy = (groupName) => {
   return g || { desc: '自定义组策略', level: 'info', levelText: '标准' }
 }
 
+const tenants = ['浦发银行租户', '零售金融租户', '信用卡中心租户', '金融科技租户']
 const orgs = ['默认组织', '智能投研系统', '影像内容管理服务平台', '数智化贷后管理系统', '信用卡网络系统', '金融云门户系统']
 const surnames = ['zhang', 'li', 'wang', 'liu', 'chen', 'yang', 'zhao', 'huang', 'zhou', 'wu', 'xu', 'sun', 'ma', 'zhu', 'hu', 'guo']
 
@@ -384,6 +388,7 @@ const genUsers = () => {
       id: `u-${i}`,
       name: `${s}${String(i).padStart(2, '0')}`,
       groups: userGroups,
+      tenant: tenants[i % tenants.length],
       org: orgs[i % orgs.length],
       region: '上海',
       env: i % 4 === 0 ? 'UAT' : 'SIT',
@@ -431,16 +436,19 @@ const pagedList = computed(() => {
 const pageNumbers = computed(() => Array.from({ length: totalPages.value }, (_, i) => i + 1))
 watch(totalPages, (n) => { if (currentPage.value > n) currentPage.value = n })
 
-/* ---------------- 勾选（跨页保留，全局 10 封顶） ---------------- */
+/* ---------------- 勾选（跨页保留，全局 10 封顶，限制同租户） ---------------- */
 const selectedMap = ref(new Map())
 const selectedCount = computed(() => selectedMap.value.size)
 const selectedUsers = computed(() => Array.from(selectedMap.value.values()))
+const selectedTenant = computed(() => selectedUsers.value[0]?.tenant || '')
 const isFull = computed(() => selectedCount.value >= MAX_SELECT)
 
 const isSelected = (id) => selectedMap.value.has(id)
-const isRowDisabled = (u) => !!u.lockReason || (isFull.value && !isSelected(u.id))
+const isDiffTenant = (u) => !!selectedTenant.value && u.tenant !== selectedTenant.value
+const isRowDisabled = (u) => !!u.lockReason || isDiffTenant(u) || (isFull.value && !isSelected(u.id))
 const rowDisabledTip = (u) => {
   if (u.lockReason) return `${u.lockReason}，不可勾选`
+  if (isDiffTenant(u)) return `所勾选用户必须属于同一租户（当前已选租户：${selectedTenant.value}）`
   if (isFull.value && !isSelected(u.id)) return `单次最多勾选 ${MAX_SELECT} 个用户`
   return ''
 }
@@ -455,6 +463,10 @@ const toggleRow = (u) => {
   if (isSelected(u.id)) {
     setSelected(m => m.delete(u.id))
   } else {
+    if (isDiffTenant(u)) {
+      showToast('所勾选用户必须属于同一租户', 'warn')
+      return
+    }
     if (isFull.value) {
       showToast(`单次最多勾选 ${MAX_SELECT} 个用户`, 'warn')
       return
@@ -463,16 +475,34 @@ const toggleRow = (u) => {
   }
 }
 
-// 表头全选：按剩余额度生效
-const pageSelectable = computed(() => pagedList.value.filter(u => !u.lockReason))
+// 表头全选：按同租户及剩余额度生效
+const pageUnlocked = computed(() => pagedList.value.filter(u => !u.lockReason))
+const hasMultiTenantOnPage = computed(() =>
+  !selectedTenant.value && new Set(pageUnlocked.value.map(u => u.tenant)).size > 1
+)
+const pageSelectable = computed(() =>
+  pageUnlocked.value.filter(u => !selectedTenant.value || u.tenant === selectedTenant.value)
+)
 const pageSelectedCount = computed(() => pageSelectable.value.filter(u => isSelected(u.id)).length)
 const headerChecked = computed(() =>
-  pageSelectable.value.length > 0 && pageSelectedCount.value === pageSelectable.value.length
+  !hasMultiTenantOnPage.value &&
+  pageSelectable.value.length > 0 &&
+  pageSelectedCount.value === pageSelectable.value.length
 )
 const headerIndeterminate = computed(() => pageSelectedCount.value > 0 && !headerChecked.value)
 const headerDisabled = computed(() =>
-  pageSelectable.value.length === 0 || (isFull.value && pageSelectedCount.value === 0)
+  hasMultiTenantOnPage.value ||
+  pageSelectable.value.length === 0 ||
+  (isFull.value && pageSelectedCount.value === 0)
 )
+const headerDisabledTip = computed(() => {
+  if (hasMultiTenantOnPage.value) return '当前页包含多个租户，请先勾选单个用户以确定租户'
+  if (pageSelectable.value.length === 0 && selectedTenant.value) {
+    return `当前页无【${selectedTenant.value}】下的可选用户`
+  }
+  if (isFull.value && pageSelectedCount.value === 0) return `单次最多勾选 ${MAX_SELECT} 个用户`
+  return ''
+})
 
 const headerCheckRef = ref(null)
 watchEffect(() => {
@@ -624,6 +654,11 @@ const batchTargetGroup = ref('')
 const openBatchJoinConfirm = () => {
   if (selectedCount.value === 0) {
     showToast('请先勾选用户', 'warn')
+    return
+  }
+  const tenantSet = new Set(selectedUsers.value.map(u => u.tenant))
+  if (tenantSet.size > 1) {
+    showToast('所勾选用户必须属于同一租户', 'warn')
     return
   }
   batchTargetGroup.value = ''
@@ -832,6 +867,8 @@ const executeBatchJoin = () => {
 
 .col-check input:disabled {
   cursor: not-allowed;
+  opacity: 0.45;
+  filter: grayscale(1);
 }
 
 .col-group {

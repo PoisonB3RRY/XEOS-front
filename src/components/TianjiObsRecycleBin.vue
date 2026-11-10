@@ -91,7 +91,6 @@
             <th v-if="isColVisible('name')" class="col-name">资产名称</th>
             <th v-if="isColVisible('org')" class="col-org">资源组织名称</th>
             <th v-if="isColVisible('zone')" class="col-zone">区域</th>
-            <th v-if="isColVisible('status')" class="col-status">状态</th>
             <th v-if="isColVisible('updateTime')" class="col-time">更新时间</th>
             <th v-if="isColVisible('op')" class="col-op">操作</th>
           </tr>
@@ -107,12 +106,6 @@
             </td>
             <td v-if="isColVisible('org')" class="col-org">{{ item.org }}</td>
             <td v-if="isColVisible('zone')" class="col-zone">{{ item.zone || '上海' }}</td>
-            <td v-if="isColVisible('status')" class="col-status">
-              <span class="status-tag-recycled">
-                <span class="status-dot"></span>
-                <span>已回收</span>
-              </span>
-            </td>
             <td v-if="isColVisible('updateTime')" class="col-time">{{ item.updateTime }}</td>
             <td v-if="isColVisible('op')" class="col-op">
               <div class="op-actions">
@@ -196,16 +189,29 @@
             </div>
           </div>
 
-          <div v-if="currentRestoreItem" class="detail-box">
-            <div class="detail-line"><span class="k">资产名称：</span><span class="v text-bold">{{ currentRestoreItem.name }}</span></div>
-            <div class="detail-line"><span class="k">所属组织：</span><span class="v">{{ currentRestoreItem.org }}</span></div>
-            <div class="detail-line"><span class="k">区域：</span><span class="v">{{ currentRestoreItem.zone || '上海' }}</span></div>
+          <div v-if="currentRestoreItem" class="detail-table-wrap">
+            <table class="detail-table">
+              <thead>
+                <tr>
+                  <th>资产名称</th>
+                  <th>所属组织</th>
+                  <th>区域</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="text-bold">{{ currentRestoreItem.name }}</td>
+                  <td>{{ currentRestoreItem.org }}</td>
+                  <td>{{ currentRestoreItem.zone || '上海' }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
         <div class="modal-footer">
           <button class="btn btn-default" @click="showRestoreModal = false">取消</button>
-          <button class="btn btn-primary" @click="confirmRestore">确认恢复</button>
+          <button class="btn btn-primary" @click="confirmRestore">确认</button>
         </div>
       </div>
     </div>
@@ -224,12 +230,11 @@ const props = defineProps({
 
 const emit = defineEmits(['back', 'restore', 'notify'])
 
-// Table columns (去掉了更新者)
+// Table columns (去掉了更新者、状态)
 const columns = ref([
   { prop: 'name', label: '资产名称', visible: true },
   { prop: 'org', label: '资源组织名称', visible: true },
   { prop: 'zone', label: '区域', visible: true },
-  { prop: 'status', label: '状态', visible: true },
   { prop: 'updateTime', label: '更新时间', visible: true },
   { prop: 'op', label: '操作', visible: true }
 ])
@@ -638,26 +643,6 @@ const handleBack = () => {
   color: #606266;
 }
 
-.col-status {
-  width: 100px;
-}
-
-.status-tag-recycled {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: #52c41a;
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background-color: #52c41a;
-}
-
 .col-time {
   width: 170px;
   color: #909399;
@@ -793,7 +778,8 @@ const handleBack = () => {
 }
 
 .modal-card {
-  width: 500px;
+  width: 560px;
+  max-width: 92vw;
   background: #ffffff;
   border-radius: 4px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
@@ -858,30 +844,33 @@ const handleBack = () => {
   margin-bottom: 4px;
 }
 
-.detail-box {
-  background-color: #f7f9fb;
-  border: 1px solid #eef2f6;
+.detail-table-wrap {
+  border: 1px solid #e8ecef;
   border-radius: 4px;
-  padding: 12px 16px;
+  overflow: hidden;
 }
 
-.detail-line {
+.detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
   font-size: 13px;
-  margin-bottom: 6px;
 }
 
-.detail-line:last-child {
-  margin-bottom: 0;
+.detail-table thead th {
+  background-color: #f7f9fb;
+  color: #606266;
+  font-weight: 500;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e8ecef;
+  white-space: nowrap;
 }
 
-.detail-line .k {
-  color: #8c939d;
-  width: 80px;
-  display: inline-block;
-}
-
-.detail-line .v {
+.detail-table tbody td {
+  padding: 11px 12px;
   color: #303133;
+  background-color: #ffffff;
+  word-break: break-word;
 }
 
 .text-bold {
