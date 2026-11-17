@@ -126,12 +126,10 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'select-menu'])
 
 const isCollapsed = ref(false)
-const activeSubItem = ref(props.modelValue || 'obs-bucket')
+const activeSubItem = ref(props.modelValue || '')
 
 watch(() => props.modelValue, (newVal) => {
-  if (newVal) {
-    activeSubItem.value = newVal
-  }
+  activeSubItem.value = newVal || ''
 })
 
 const expandedGroups = reactive({

@@ -37,17 +37,33 @@
             </tbody>
           </table>
         </div>
+
+        <div v-if="repCfgError" class="rep-error-banner">
+          <div class="rep-error-icon">
+            <svg viewBox="0 0 24 24" fill="#d93025">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+          </div>
+          <div class="rep-error-text">
+            <strong>无法移入回收站</strong>
+            <div>{{ repCfgError }}</div>
+          </div>
+        </div>
       </div>
 
       <div class="modal-footer">
-        <button class="btn btn-default" @click="close">取消</button>
-        <button class="btn btn-primary" @click="handleConfirmRecycle">确认回收</button>
+        <button class="btn btn-default" :disabled="isChecking" @click="close">取消</button>
+        <button class="btn btn-primary" :disabled="isChecking" @click="handleConfirmRecycle">
+          {{ isChecking ? '校验中...' : '确认回收' }}
+        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { ref, watch } from 'vue'
+
 const props = defineProps({
   visible: {
     type: Boolean,
@@ -59,16 +75,57 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:visible', 'confirm'])
+const emit = defineEmits(['update:visible', 'confirm', 'notify'])
+
+const isChecking = ref(false)
+const repCfgError = ref('')
+
+watch(
+  () => [props.visible, props.bucket],
+  () => {
+    repCfgError.value = ''
+    isChecking.value = false
+  }
+)
+
+// 模拟调用查询跨域复制配置接口（queryRepCfgList）
+const queryRepCfgList = async (bucket) => {
+  await new Promise((resolve) => setTimeout(resolve, 180))
+  if (bucket?.hasRepCfg) {
+    return [
+      {
+        sourceBucket: bucket.name,
+        targetBucket: 'testdcsp',
+        status: '启用'
+      }
+    ]
+  }
+  return []
+}
 
 const close = () => {
+  repCfgError.value = ''
+  isChecking.value = false
   emit('update:visible', false)
 }
 
-const handleConfirmRecycle = () => {
-  if (!props.bucket) return
-  emit('confirm', props.bucket)
-  close()
+const handleConfirmRecycle = async () => {
+  if (!props.bucket || isChecking.value) return
+  repCfgError.value = ''
+  isChecking.value = true
+  try {
+    const repCfgList = await queryRepCfgList(props.bucket)
+    if (Array.isArray(repCfgList) && repCfgList.length > 0) {
+      const msg = '当前存储桶仍包含跨域复制配置，请先删除跨域复制后再执行回收操作。'
+      repCfgError.value = msg
+      emit('notify', msg, 'warning')
+      return
+    }
+    emit('confirm', props.bucket)
+    close()
+  } finally {
+    isChecking.value = false
+  }
 }
 </script>
 
@@ -194,6 +251,36 @@ const handleConfirmRecycle = () => {
   color: #1f2d3d;
 }
 
+.rep-error-banner {
+  display: flex;
+  gap: 10px;
+  padding: 10px 14px;
+  background-color: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-radius: 4px;
+  margin-top: 14px;
+}
+
+.rep-error-icon svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.rep-error-text {
+  font-size: 13px;
+  color: #cf1322;
+  line-height: 1.5;
+}
+
+.rep-error-text strong {
+  display: block;
+  font-size: 13px;
+  color: #a8071a;
+  margin-bottom: 2px;
+}
+
 .modal-footer {
   padding: 12px 20px;
   background: #fafbfc;
@@ -236,6 +323,11 @@ const handleConfirmRecycle = () => {
 .btn-primary:hover {
   background-color: #1b56ce;
   border-color: #1b56ce;
+}
+
+.btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 @keyframes fadeIn {

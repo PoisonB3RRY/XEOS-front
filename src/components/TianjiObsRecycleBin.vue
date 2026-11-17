@@ -27,6 +27,7 @@
               <option value="name">资产名称</option>
               <option value="org">资源组织名称</option>
               <option value="zone">区域</option>
+              <option value="status">状态</option>
             </select>
             <div class="search-divider"></div>
             <input 
@@ -91,6 +92,7 @@
             <th v-if="isColVisible('name')" class="col-name">资产名称</th>
             <th v-if="isColVisible('org')" class="col-org">资源组织名称</th>
             <th v-if="isColVisible('zone')" class="col-zone">区域</th>
+            <th v-if="isColVisible('status')" class="col-status">状态</th>
             <th v-if="isColVisible('updateTime')" class="col-time">更新时间</th>
             <th v-if="isColVisible('op')" class="col-op">操作</th>
           </tr>
@@ -106,10 +108,19 @@
             </td>
             <td v-if="isColVisible('org')" class="col-org">{{ item.org }}</td>
             <td v-if="isColVisible('zone')" class="col-zone">{{ item.zone || '上海' }}</td>
+            <td v-if="isColVisible('status')" class="col-status">
+              <span :class="['status-tag', item.status === '待自动销毁' ? 'status-pending-destroy' : 'status-recycled']">
+                {{ item.status || '已回收' }}
+              </span>
+            </td>
             <td v-if="isColVisible('updateTime')" class="col-time">{{ item.updateTime }}</td>
             <td v-if="isColVisible('op')" class="col-op">
               <div class="op-actions">
-                <a class="op-link-restore" @click="handleOpenSingleRestore(item)">恢复</a>
+                <a
+                  :class="['op-link-restore', { disabled: item.status === '待自动销毁' }]"
+                  :title="item.status === '待自动销毁' ? '待自动销毁状态的存储桶不允许恢复' : '恢复存储桶'"
+                  @click="handleOpenSingleRestore(item)"
+                >恢复</a>
               </div>
             </td>
           </tr>
@@ -230,11 +241,12 @@ const props = defineProps({
 
 const emit = defineEmits(['back', 'restore', 'notify'])
 
-// Table columns (去掉了更新者、状态)
+// Table columns
 const columns = ref([
   { prop: 'name', label: '资产名称', visible: true },
   { prop: 'org', label: '资源组织名称', visible: true },
   { prop: 'zone', label: '区域', visible: true },
+  { prop: 'status', label: '状态', visible: true },
   { prop: 'updateTime', label: '更新时间', visible: true },
   { prop: 'op', label: '操作', visible: true }
 ])
@@ -284,6 +296,7 @@ const filteredList = computed(() => {
     if (field === 'name') return (item.name || '').toLowerCase().includes(keyword)
     if (field === 'org') return (item.org || '').toLowerCase().includes(keyword)
     if (field === 'zone') return (item.zone || '').toLowerCase().includes(keyword)
+    if (field === 'status') return (item.status || '已回收').toLowerCase().includes(keyword)
     return true
   })
 })
@@ -323,6 +336,7 @@ const showRestoreModal = ref(false)
 const currentRestoreItem = ref(null)
 
 const handleOpenSingleRestore = (item) => {
+  if (item.status === '待自动销毁') return
   currentRestoreItem.value = item
   showRestoreModal.value = true
 }
@@ -643,6 +657,31 @@ const handleBack = () => {
   color: #606266;
 }
 
+.col-status {
+  min-width: 110px;
+}
+
+.status-tag {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 3px;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 500;
+}
+
+.status-recycled {
+  background-color: #f0f5ff;
+  color: #2468f2;
+  border: 1px solid #d6e4ff;
+}
+
+.status-pending-destroy {
+  background-color: #fff7e6;
+  color: #d46b08;
+  border: 1px solid #ffd591;
+}
+
 .col-time {
   width: 170px;
   color: #909399;
@@ -668,6 +707,16 @@ const handleBack = () => {
 .op-link-restore:hover {
   text-decoration: underline;
   color: #1b56ce;
+}
+
+.op-link-restore.disabled {
+  color: #c0c4cc;
+  cursor: not-allowed;
+}
+
+.op-link-restore.disabled:hover {
+  text-decoration: none;
+  color: #c0c4cc;
 }
 
 .empty-cell {

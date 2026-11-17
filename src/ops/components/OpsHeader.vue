@@ -31,9 +31,9 @@
 
     <div class="header-right">
       <!-- Portal Switch Pill -->
-      <a href="http://localhost:3000/" target="_blank" class="portal-badge" title="前往租户运营门户 (3000端口)">
+      <a href="http://localhost:3000/" target="_blank" class="portal-badge" title="前往租户门户 (3000端口)">
         <span class="dot"></span>
-        前往租户运营门户 (3000)
+        前往租户门户 (3000)
       </a>
 
       <!-- User Profile -->
@@ -60,7 +60,7 @@
               <polyline points="15 3 21 3 21 9" />
               <line x1="10" y1="14" x2="21" y2="3" />
             </svg>
-            切换到运营门户 (3000)
+            切换到租户门户 (3000)
           </a>
           <div class="dropdown-item" @click="showMenu = false">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

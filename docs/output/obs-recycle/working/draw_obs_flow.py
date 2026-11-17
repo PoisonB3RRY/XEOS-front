@@ -217,6 +217,8 @@ def fig6():
     a1 = f.add(["列表页点击该行“回收”"], "start")
     a2 = f.add(["打开“移入回收站确认”弹窗", "带入存储桶名称、资源组织、区域（只读）"])
     a3 = f.add(["是否确认回收？"], "decision")
+    a3b = f.add(["调用 queryRepCfgList", "查询当前桶跨域复制配置"], "api")
+    a3c = f.add(["是否存在跨域复制配置？"], "decision")
     a4 = f.add(["GET /?policy", "读取并保存原桶策略快照", "404 NoSuchBucketPolicy 视为空策略"], "api")
     a5 = f.add(["生成 deny 策略",
                 "Sid = deny-{桶名}-{时间戳}",
@@ -228,14 +230,20 @@ def fig6():
     a9 = f.add(["平台状态置“已回收”，记录审计", "列表移除，回收站出现该桶"])
     a10 = f.add(["桶进入静置状态，业务访问返回 403"], "end")
     cancel = f.add_side(["取消", "弹窗关闭", "不产生任何变更"], "note", a3, 1340)
+    ccr_block = f.add_side(["阻断回收并提示：",
+                            "请先删除跨域复制后再执行回收",
+                            "桶保持在用状态"], "note", a3c, 1340)
     fail = f.add_side(["按错误码提示：",
                        "MalformedPolicy / EntityTooLarge /",
                        "403 / 404",
                        "已部分覆盖时按快照回写原策略"], "note", a7, 1340)
     f.down(a1, a2)
     f.down(a2, a3)
-    f.down(a3, a4, "是")
+    f.down(a3, a3b, "是")
     f.right(a3, cancel, "否")
+    f.down(a3b, a3c)
+    f.down(a3c, a4, "否")
+    f.right(a3c, ccr_block, "是")
     f.down(a4, a5)
     f.down(a5, a6)
     f.down(a6, a7)
@@ -307,8 +315,58 @@ def fig8():
     f.render(os.path.join(OUT, "fig8_flow_exception.png"))
 
 
+# ================================================================ 图 9 自动销毁流程
+def fig9():
+    f = Flow()
+    a1 = f.add(["静置（静默）期届满", "回收站中该桶状态仍为“已回收”"], "start")
+    a2 = f.add(["后端自动生成销毁用生命周期配置",
+                "当前版本、历史版本、碎片均 1 天"], "sub")
+    a3 = f.add(["发起 PDOS 工单并接入审批",
+                "工单含桶名、区域、资源组织、",
+                "三条规则与销毁原因"], "api")
+    a4 = f.add(["PDOS 审批是否通过？"], "decision")
+    a5 = f.add(["云管编排流程",
+                "创建 OBS-Lifecycle（三条规则）"], "api")
+    a6 = f.add(["规则创建并读回校验成功？"], "decision")
+    a7 = f.add(["状态由“已回收”翻转为“待自动销毁”",
+                "不允许恢复（restoreForbidden）"], "sub")
+    a8 = f.add(["定时任务扫描“待自动销毁”的桶",
+                "逐桶判定：当前版本、历史版本、碎片"], "api")
+    a9 = f.add(["该桶是否为空桶？"], "decision")
+    a10 = f.add(["调用云管订单服务",
+                 "发起该桶对应的 OBS 桶释放流程"], "api")
+    a11 = f.add(["从底层销毁该 OBS 桶",
+                 "清理平台侧桶信息与 OBS-Lifecycle、",
+                 "OBS-Policy、OBS-ReplicationConfig、",
+                 "OBS-CORS 等配置记录"], "sub")
+    a12 = f.add(["桶完成最终销毁，存储与配额释放", "回收站记录关闭，全程留痕"], "end")
+    reject = f.add_side(["驳回：保持“已回收”",
+                         "记录原因，不翻转状态"], "note", a4, 1352, w=440)
+    cfail = f.add_side(["失败：保持“已回收”",
+                        "重试 3 次仍失败则告警"], "note", a6, 1352, w=440)
+    notempty = f.add_side(["非空：保持“待自动销毁”",
+                           "等待下一轮扫描",
+                           "连续多轮非空则告警"], "note", a9, 1352, w=440)
+    f.down(a1, a2)
+    f.down(a2, a3)
+    f.down(a3, a4)
+    f.down(a4, a5, "通过")
+    f.right(a4, reject, "驳回")
+    f.down(a5, a6)
+    f.down(a6, a7, "是")
+    f.right(a6, cfail, "否")
+    f.down(a7, a8)
+    f.down(a8, a9)
+    f.down(a9, a10, "是")
+    f.right(a9, notempty, "否")
+    f.down(a10, a11)
+    f.down(a11, a12)
+    f.render(os.path.join(OUT, "fig9_flow_autodestroy.png"))
+
+
 if __name__ == "__main__":
     fig5()
     fig6()
     fig7()
     fig8()
+    fig9()

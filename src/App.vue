@@ -113,6 +113,15 @@
             @back="handleGoBack"
           />
 
+          <!-- 租户门户首页 -->
+          <div v-else-if="currentView === 'home'" class="other-view-placeholder">
+            <div class="placeholder-card">
+              <div class="placeholder-icon">☁️</div>
+              <h3>欢迎使用浦发银行云管理平台（租户门户）</h3>
+              <p>请从左侧导航栏选择需要管理的云产品服务。</p>
+            </div>
+          </div>
+
           <!-- 其它服务模块占位 -->
           <div v-else class="other-view-placeholder">
             <div class="placeholder-card">
@@ -164,10 +173,10 @@ import TianjiObsRecycleBin from './components/TianjiObsRecycleBin.vue'
 const currentProduct = ref('tianji')
 
 // Sidebar Menu selection: default to 'sfs'
-const currentMenu = ref('sfs')
+const currentMenu = ref('')
 
 // Main View: 'sfs-list' | 'sfs-create' | 'vm-list' | 'vm-detail' | 'bucket-list' | 'bucket-detail' | 'other'
-const currentView = ref('sfs-list')
+const currentView = ref('home')
 
 // Toast notification state
 const toastMessage = ref('')
@@ -550,6 +559,7 @@ const initialTianjiBucketList = [
     ha: '多AZ',
     envType: '常态环境',
     env: 'SIT',
+    hasRepCfg: true,
     createTime: '2025-12-30 10:28:44'
   },
   {
@@ -699,14 +709,14 @@ const generateMockTianjiRecycleList = () => {
   const initialScreenshotItems = [
     { name: 'esf-lahx-gw01', org: '企业级微服务平台', zone: '上海', status: '已回收', updater: '马逸飞', updateTime: '2026-11-09 11:07:41' },
     { name: 'esf-dghx-mng', org: '企业级微服务平台', zone: '上海', status: '已回收', updater: '马逸飞', updateTime: '2026-11-09 11:07:41' },
-    { name: 'esf-syyg-gw02', org: '企业级微服务平台', zone: '合肥', status: '已回收', updater: '冯逸飞', updateTime: '2026-11-09 11:07:41' },
+    { name: 'esf-syyg-gw02', org: '企业级微服务平台', zone: '合肥', status: '待自动销毁', updater: '冯逸飞', updateTime: '2026-08-12 11:07:41' },
     { name: 'esf-syyg-gw01', org: '企业级微服务平台', zone: '上海', status: '已回收', updater: '冯逸飞', updateTime: '2026-11-09 11:07:41' },
     { name: 'esf-syyg-mng', org: '企业级微服务平台', zone: '合肥', status: '已回收', updater: '冯逸飞', updateTime: '2026-11-09 11:07:41' },
     { name: 'esf-lahx-gw02', org: '企业级微服务平台', zone: '上海', status: '已回收', updater: '冯逸飞', updateTime: '2026-11-09 11:07:41' },
-    { name: 'esf-lahx-mng', org: '企业级微服务平台', zone: '合肥', status: '已回收', updater: '冯逸飞', updateTime: '2026-11-09 11:07:41' },
+    { name: 'esf-lahx-mng', org: '企业级微服务平台', zone: '合肥', status: '待自动销毁', updater: '冯逸飞', updateTime: '2026-08-14 11:07:41' },
     { name: 'esf-dghx-wg01', org: '企业级微服务平台', zone: '上海', status: '已回收', updater: '冯逸飞', updateTime: '2026-11-09 11:06:41' },
     { name: 'esf-dghx-wg02', org: '企业级微服务平台', zone: '合肥', status: '已回收', updater: '冯逸飞', updateTime: '2026-11-09 11:06:41' },
-    { name: 'scmp-zb-mongodb02', org: '金融云平台管理系统', zone: '上海', status: '已回收', updater: '王中浩', updateTime: '2026-11-05 19:05:41' }
+    { name: 'scmp-zb-mongodb02', org: '金融云平台管理系统', zone: '上海', status: '待自动销毁', updater: '王中浩', updateTime: '2026-08-15 19:05:41' }
   ]
 
   const list = [...initialScreenshotItems]
@@ -724,7 +734,7 @@ const generateMockTianjiRecycleList = () => {
       name: pref + '-bucket-' + num,
       org: orgs[i % orgs.length],
       zone: zones[i % zones.length],
-      status: '已回收',
+      status: i % 5 === 0 ? '待自动销毁' : '已回收',
       updater: updaters[i % updaters.length],
       updateTime: '2026-11-0' + Math.max(1, 9 - Math.floor(i / 15)) + ' 11:' + minute + ':' + second
     })
@@ -759,10 +769,9 @@ const detailDefaultTab = ref('ccr')
 
 // Dynamic Tabs for TabBar: default to Tianji SFS
 const tabs = ref([
-  { id: 'home', name: '首页', closable: false },
-  { id: 'sfs', name: '信创文件存储(SFS)', closable: true }
+  { id: 'home', name: '首页', closable: false }
 ])
-const activeTabId = ref('sfs')
+const activeTabId = ref('home')
 
 const handleProductChange = (productId) => {
   if (productId === 'xuanwu') {
@@ -771,10 +780,9 @@ const handleProductChange = (productId) => {
     activeTabId.value = 'vm'
     ensureTab({ id: 'vm', name: '云虚拟机', closable: true })
   } else if (productId === 'tianji') {
-    currentMenu.value = 'sfs'
-    currentView.value = 'sfs-list'
-    activeTabId.value = 'sfs'
-    ensureTab({ id: 'sfs', name: '信创文件存储(SFS)', closable: true })
+    currentMenu.value = ''
+    currentView.value = 'home'
+    activeTabId.value = 'home'
   }
 }
 
@@ -993,15 +1001,9 @@ const handleGoBack = () => {
 
 const handleTabClick = (tabId) => {
   if (tabId === 'home') {
-    if (currentProduct.value === 'tianji') {
-      currentView.value = 'sfs-list'
-      currentMenu.value = 'sfs'
-      activeTabId.value = 'sfs'
-    } else {
-      currentView.value = 'vm-list'
-      currentMenu.value = 'vm'
-      activeTabId.value = 'vm'
-    }
+    currentView.value = 'home'
+    currentMenu.value = ''
+    activeTabId.value = 'home'
   } else if (tabId === 'evs') {
     currentView.value = 'evs-list'
     currentMenu.value = 'evs'

@@ -247,10 +247,11 @@
       @confirm="handleConfirmExpand" 
     />
 
-        <TianjiObsRecycleModal 
+    <TianjiObsRecycleModal 
       v-model:visible="showRecycleModal" 
       :bucket="currentBucket" 
       @confirm="handleConfirmRecycle" 
+      @notify="(msg, type) => emit('notify', msg, type)"
     />
 
     <TianjiObsDeleteModal 

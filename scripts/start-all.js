@@ -1,6 +1,6 @@
 import { spawn } from 'child_process'
 
-console.log('正在同时启动 运营门户 (3000) 与 运维门户 (3001)...')
+console.log('正在同时启动 租户门户 (3000) 与 运维门户 (3001)...')
 
 const isWin = process.platform === 'win32'
 const npxCmd = isWin ? 'npx.cmd' : 'npx'
